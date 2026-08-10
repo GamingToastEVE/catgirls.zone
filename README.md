@@ -38,9 +38,15 @@ rendering.
 
 ### Traits
 
-ears (5) · hair style (7) · hair color (12) · eyes (6) · eye color (10) ·
-mouth (5) · skin (6) · background (6) · accessory (4) · blush · freckles ·
-heterochromia · head tilt.
+ears (5) · hair style (7) · hair color (14) · eyes (6) · eye color (10) ·
+mouth (5) · skin (6) · clothing (6) · background (6) · accessory (4) ·
+blush · freckles · heterochromia · head tilt.
+
+Everything is drawn in a chibi style: oversized round head, eyes taking up
+about a third of the face with gradient irises and stacked highlights, tiny
+nose and mouth, token shoulders. Outlines are never black — each shape's
+stroke is its own fill mixed toward a single ink tone, which is what keeps it
+looking drawn instead of clip-arted.
 
 ## Development
 
