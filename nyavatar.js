@@ -158,7 +158,7 @@
           "C56,83.5 44,83.5 40,82 C29,78 21,66 21,52 C21,34 31,20 50,20 Z",
     eyeY: 60, eyeL: 36.5, eyeR: 63.5, eyeRX: 8, eyeRY: 10,
     browY: 45, noseY: 68.5, mouthY: 72.5, blushY: 68, blushX: 31,
-    whiskerY: 73, jaw: "M34,74 C40,80 60,80 66,74",
+    whiskers: true, whiskerY: 73, jaw: "M34,74 C40,80 60,80 66,74",
 
     // A plain ellipse, expressed as a path so the shared eye renderer can
     // clip and stroke it the same way as the anime almond.
@@ -179,37 +179,58 @@
   /* ---------- anime ----------------------------------------------------- */
 
   G.anime = {
-    // Narrower skull, cheekbones, and a chin that actually comes to a point.
-    head: "M50,14 C67,14 74,27 74,44 C74,55 71,64 65,73 " +
-          "C61,79 55,86 50,86 C45,86 39,79 35,73 " +
-          "C29,64 26,55 26,44 C26,27 33,14 50,14 Z",
-    eyeY: 57, eyeL: 38, eyeR: 62, eyeRX: 8.5, eyeRY: 9.5,
-    browY: 43, noseY: 66, mouthY: 73.5, blushY: 64, blushX: 32,
-    whiskerY: 70, jaw: "M39,76 C44,81 56,81 61,76",
+    // Proportions matter more than detail here. The eye line sits a little
+    // above the middle of the head, the mouth two thirds of the way from the
+    // eyes to the chin, and the jaw tapers from cheekbones at the eye line —
+    // a long empty lower face was what made earlier versions look wrong.
+    head: "M50,15 C64,15 72,25 72,41 C72,50 70,57 66,64 " +
+          "C62,71 56,80 50,82 C44,80 38,71 34,64 " +
+          "C30,57 28,50 28,41 C28,25 36,15 50,15 Z",
+    eyeY: 53, eyeL: 39, eyeR: 61, eyeRX: 7.4, eyeRY: 8,
+    browY: 40, noseY: 63, mouthY: 70, blushY: 60, blushX: 33,
+    whiskers: false, // on a narrow face they read as scars, not whiskers
+    jaw: "",
 
     // Almond: inner corner low, outer corner high, peak toward the outside.
     eyeShape: function (cx, ry, rx) {
       var y = G.anime.eyeY, o = cx < 50 ? -1 : 1;
-      var ix = cx - o * rx, iy = y + ry * 0.28;
-      var ox = cx + o * rx, oy = y - ry * 0.3;
+      var ix = cx - o * rx, iy = y + ry * 0.3;
+      var ox = cx + o * rx, oy = y - ry * 0.35;
       return "M" + n(ix) + "," + n(iy) +
-        " C" + n(cx - o * rx * 0.6) + "," + n(y - ry * 0.78) +
-          " " + n(cx + o * rx * 0.25) + "," + n(y - ry) +
+        " C" + n(cx - o * rx * 0.6) + "," + n(y - ry * 0.8) +
+          " " + n(cx + o * rx * 0.3) + "," + n(y - ry) +
           " " + n(ox) + "," + n(oy) +
-        " C" + n(cx + o * rx * 0.9) + "," + n(y + ry * 0.35) +
+        " C" + n(cx + o * rx * 0.85) + "," + n(y + ry * 0.35) +
           " " + n(cx + o * rx * 0.4) + "," + n(y + ry * 0.9) +
-          " " + n(cx - o * rx * 0.1) + "," + n(y + ry * 0.82) +
-        " C" + n(cx - o * rx * 0.55) + "," + n(y + ry * 0.72) +
+          " " + n(cx - o * rx * 0.1) + "," + n(y + ry * 0.85) +
+        " C" + n(cx - o * rx * 0.55) + "," + n(y + ry * 0.75) +
           " " + n(cx - o * rx * 0.85) + "," + n(y + ry * 0.6) +
           " " + n(ix) + "," + n(iy) + " Z";
     },
-    upperLid: function (cx, ry, rx, drop) {
+
+    // A filled crescent rather than a stroked arc: thin at the inner corner,
+    // thick at the outer. Stroking it was what produced the black slabs.
+    lash: function (cx, ry, rx, drop) {
       var y = G.anime.eyeY + drop, o = cx < 50 ? -1 : 1;
-      return "M" + n(cx - o * rx) + "," + n(y + ry * 0.28) +
-        " C" + n(cx - o * rx * 0.6) + "," + n(y - ry * 0.78) +
-          " " + n(cx + o * rx * 0.25) + "," + n(y - ry) +
-          " " + n(cx + o * rx) + "," + n(y - ry * 0.3) +
-        " l" + n(o * 4) + ",-2.6";
+      return "M" + n(cx - o * rx) + "," + n(y + ry * 0.3) +
+        " C" + n(cx - o * rx * 0.6) + "," + n(y - ry * 0.8) +
+          " " + n(cx + o * rx * 0.3) + "," + n(y - ry) +
+          " " + n(cx + o * rx * 1.06) + "," + n(y - ry * 0.42) +
+        " C" + n(cx + o * rx * 0.75) + "," + n(y - ry * 0.72) +
+          " " + n(cx + o * rx * 0.1) + "," + n(y - ry * 0.72) +
+          " " + n(cx - o * rx * 0.45) + "," + n(y - ry * 0.3) +
+        " C" + n(cx - o * rx * 0.75) + "," + n(y - ry * 0.05) +
+          " " + n(cx - o * rx * 0.92) + "," + n(y + ry * 0.15) +
+          " " + n(cx - o * rx) + "," + n(y + ry * 0.3) + " Z";
+    },
+
+    // The crease above the lid — small, but it's most of what sells "anime".
+    crease: function (cx, ry, rx, drop) {
+      var y = G.anime.eyeY + drop, o = cx < 50 ? -1 : 1;
+      return "M" + n(cx - o * rx * 0.75) + "," + n(y - ry * 0.95) +
+        " C" + n(cx - o * rx * 0.2) + "," + n(y - ry * 1.45) +
+          " " + n(cx + o * rx * 0.6) + "," + n(y - ry * 1.35) +
+          " " + n(cx + o * rx * 1.02) + "," + n(y - ry * 0.75);
     }
   };
 
@@ -240,8 +261,8 @@
 
     // pointy / tufted / big share one silhouette, scaled outward + up.
     // Anime ears are a touch narrower and set closer to the skull.
-    var out = (t.ears === "big" ? 6 : 0) - (anime ? 2 : 0);
-    var up = t.ears === "big" ? 6 : 0;
+    var out = (t.ears === "big" ? 6 : 0) + (anime ? 3 : 0);
+    var up = (t.ears === "big" ? 6 : 0) + (anime ? 3 : 0);
     var lx = 19 - out, ly = 8 - up, rx = 81 + out, ry = 8 - up;
     var tuft = t.ears === "tufted"
       ? '<g stroke="' + lift(base) + '" stroke-width="1.8" stroke-linecap="round" fill="none">' +
@@ -346,114 +367,112 @@
 
   function animeHairBack(t) {
     var shade = t.hairColor[1], ink = line(shade);
-    var s = ' fill="' + shade + '" stroke="' + ink + '" stroke-width="1.5" stroke-linejoin="round"';
-    var cap = '<path d="M22,52 C22,22 34,8 50,8 C66,8 78,22 78,52 L78,66 ' +
-              'C66,72 34,72 22,66 Z"' + s + '/>';
+    var s = ' fill="' + shade + '" stroke="' + ink + '" stroke-width="1.4" stroke-linejoin="round"';
+    // Wider than the skull on purpose: hair with no volume beside the face
+    // is what made the head look too broad.
+    var cap = '<path d="M20,46 C20,12 33,3 50,3 C67,3 80,12 80,46 L80,62 ' +
+              'C64,68 36,68 20,62 Z"' + s + '/>';
 
     switch (t.hair) {
       case "long":
-        return '<path d="M21,52 C21,20 34,7 50,7 C66,7 79,20 79,52 ' +
-               'C79,70 84,88 86,100 L74,100 L70,88 L68,100 L32,100 L30,88 ' +
-               'L26,100 L14,100 C16,88 21,70 21,52 Z"' + s + '/>';
+        return '<path d="M19,46 C19,11 33,2 50,2 C67,2 81,11 81,46 ' +
+               'C81,66 85,86 87,100 L73,100 L70,86 L67,100 L33,100 L30,86 ' +
+               'L27,100 L13,100 C15,86 19,66 19,46 Z"' + s + '/>';
       case "hime":
-        return '<path d="M21,52 C21,20 34,7 50,7 C66,7 79,20 79,52 ' +
-               'C79,72 82,90 82,100 L18,100 C18,90 21,72 21,52 Z"' + s + '/>' +
-               '<path d="M24,46 C18,62 17,80 19,100 L31,100 C27,80 27,62 30,48 Z"' + s + '/>' +
-               '<path d="M76,46 C82,62 83,80 81,100 L69,100 C73,80 73,62 70,48 Z"' + s + '/>';
+        return '<path d="M19,46 C19,11 33,2 50,2 C67,2 81,11 81,46 ' +
+               'C81,68 84,88 84,100 L16,100 C16,88 19,68 19,46 Z"' + s + '/>' +
+               '<path d="M23,42 C17,58 16,80 18,100 L31,100 C26,80 26,58 29,44 Z"' + s + '/>' +
+               '<path d="M77,42 C83,58 84,80 82,100 L69,100 C74,80 74,58 71,44 Z"' + s + '/>';
       case "twintails":
         return cap +
-          '<path d="M26,40 C8,46 4,70 8,86 C10,96 12,100 16,100 L28,100 ' +
-          'C22,84 20,62 32,46 Z"' + s + '/>' +
-          '<path d="M74,40 C92,46 96,70 92,86 C90,96 88,100 84,100 L72,100 ' +
-          'C78,84 80,62 68,46 Z"' + s + '/>';
+          '<path d="M24,34 C8,40 4,66 8,84 C10,94 12,100 16,100 L28,100 ' +
+          'C21,84 19,60 31,40 Z"' + s + '/>' +
+          '<path d="M76,34 C92,40 96,66 92,84 C90,94 88,100 84,100 L72,100 ' +
+          'C79,84 81,60 69,40 Z"' + s + '/>';
       case "ponytail":
         return cap +
-          '<path d="M72,34 C94,42 96,72 90,94 C88,100 84,101 84,94 ' +
-          'C88,70 86,48 66,40 Z"' + s + '/>';
+          '<path d="M74,28 C94,36 96,70 90,92 C88,99 84,100 84,92 ' +
+          'C88,64 86,42 69,34 Z"' + s + '/>';
       case "buns":
         return cap +
-          '<circle cx="20" cy="28" r="11"' + s + '/>' +
-          '<circle cx="80" cy="28" r="11"' + s + '/>' +
-          '<path d="M15,28 q5,-6 10,0 q-5,6 -10,0" fill="' + t.hairColor[0] + '" opacity=".5"/>' +
-          '<path d="M75,28 q5,-6 10,0 q-5,6 -10,0" fill="' + t.hairColor[0] + '" opacity=".5"/>';
+          '<circle cx="20" cy="22" r="11"' + s + '/>' +
+          '<circle cx="80" cy="22" r="11"' + s + '/>' +
+          '<path d="M15,22 q5,-5.5 10,0 q-5,5.5 -10,0" fill="' + t.hairColor[0] + '" opacity=".5"/>' +
+          '<path d="M75,22 q5,-5.5 10,0 q-5,5.5 -10,0" fill="' + t.hairColor[0] + '" opacity=".5"/>';
       case "bob":
-        return '<path d="M21,52 C21,22 34,8 50,8 C66,8 79,22 79,52 ' +
-               'C79,64 78,72 76,78 L70,70 L68,80 L62,72 L60,80 L40,80 L38,72 ' +
-               'L32,80 L30,70 L24,78 C22,72 21,64 21,52 Z"' + s + '/>';
+        return '<path d="M20,46 C20,13 33,3 50,3 C67,3 80,13 80,46 ' +
+               'C80,58 79,66 77,73 L71,65 L69,75 L62,67 L60,75 L40,75 L38,67 ' +
+               'L31,75 L29,65 L23,73 C21,66 20,58 20,46 Z"' + s + '/>';
       default: // messy
-        return '<path d="M21,52 C21,20 34,7 50,7 C66,7 79,20 79,52 ' +
-               'L84,74 L76,68 L78,82 L69,70 L67,80 L60,72 L54,80 L50,70 ' +
-               'L46,80 L40,72 L33,80 L31,70 L22,82 L24,68 L16,74 Z"' + s + '/>';
+        return '<path d="M19,46 C19,11 33,2 50,2 C67,2 81,11 81,46 ' +
+               'L86,68 L77,61 L79,76 L69,64 L67,75 L60,66 L54,75 L50,64 ' +
+               'L46,75 L40,66 L33,75 L31,64 L21,76 L23,61 L14,68 Z"' + s + '/>';
     }
   }
 
   function animeHairFront(t) {
     var base = t.hairColor[0], ink = line(t.hairColor[1]);
-    var s = ' fill="' + base + '" stroke="' + ink + '" stroke-width="1.5" stroke-linejoin="round"';
+    var s = ' fill="' + base + '" stroke="' + ink + '" stroke-width="1.4" stroke-linejoin="round"';
 
-    // Bangs are built from strands: each tip is a curved lobe dropping to a
-    // point, separated by a notch back up to the crown. Writing them by hand
-    // gave a sawtooth; generating them keeps the tips shallow and even.
+    // Bangs: a smooth scalloped silhouette, with the strand separations drawn
+    // as thin interior lines. Cutting notches into the outline instead gave
+    // the forehead a row of spikes.
     function bangs(tips) {
-      var d = "M23,52 C23,20 35,9 50,9 C65,9 77,20 77,52";
+      var d = "M21,46 C21,13 34,3 50,3 C66,3 79,13 79,46";
+      var strands = "";
       tips.forEach(function (p) {
-        d += " C" + (p[0] + 5) + "," + (p[1] - 12) +
-             " " + (p[0] + 2) + "," + (p[1] - 4) +
-             " " + p[0] + "," + p[1] +
-             // notch back up, but only ~9 units — deeper than this and the
-             // forehead grows a row of spikes
-             " C" + (p[0] - 3) + "," + (p[1] - 4) +
-             " " + (p[0] - 4) + "," + (p[1] - 8) +
-             " " + (p[0] - 6) + "," + (p[1] - 9);
+        d += " C" + (p[0] + 5) + "," + (p[1] - 7) +
+             " " + (p[0] + 2) + "," + (p[1] - 1) +
+             " " + p[0] + "," + p[1];
+        // start each strand near the crown and fan outward, so they read as
+        // hair falling rather than parallel hatching
+        strands += "M" + (50 + (p[0] - 50) * 0.3) + ",11 C" +
+                   (50 + (p[0] - 50) * 0.75) + "," + (p[1] - 20) + " " +
+                   (p[0] + 2) + "," + (p[1] - 11) + " " + p[0] + "," + (p[1] - 3) + " ";
       });
-      return d + " L23,52 Z";
+      return {
+        d: d + " L21,46 Z",
+        strands: '<path d="' + strands + '" fill="none" stroke="' + ink +
+                 '" stroke-width="1" stroke-linecap="round" opacity=".3"/>'
+      };
     }
 
-    var fringe = {
-      // straight-cut princess bangs — smooth scallops, no strand tips
-      hime: 'M23,50 C23,20 35,9 50,9 C65,9 77,20 77,50 ' +
-            'C76,45 74,43 71,44 C68,45 66,46 62,46 C58,46 56,44 50,44 ' +
-            'C44,44 42,46 38,46 C34,46 32,45 29,44 C26,43 24,45 23,50 Z',
-      long: bangs([[70, 46], [60, 48], [50, 44], [40, 48], [30, 46]]),
-      bob: bangs([[68, 45], [58, 47], [50, 43], [42, 47], [32, 45]]),
-      twintails: bangs([[68, 44], [59, 47], [50, 43], [41, 47], [32, 44]]),
-      messy: bangs([[71, 46], [64, 50], [57, 45], [50, 49], [43, 45], [36, 50], [29, 46]]),
-      // swept across to one side
-      ponytail: bangs([[66, 44], [54, 48], [44, 46], [32, 42]]),
-      buns: bangs([[66, 44], [56, 46], [46, 46], [34, 44]])
+    var f = {
+      hime: bangs([[70, 40], [60, 41], [50, 40], [40, 41], [30, 40]]),
+      long: bangs([[69, 39], [60, 42], [50, 38], [40, 42], [31, 39]]),
+      bob: bangs([[67, 38], [58, 41], [50, 37], [42, 41], [33, 38]]),
+      twintails: bangs([[67, 38], [59, 41], [50, 37], [41, 41], [33, 38]]),
+      messy: bangs([[70, 40], [63, 44], [56, 39], [50, 43], [44, 39], [37, 44], [30, 40]]),
+      ponytail: bangs([[65, 38], [54, 42], [44, 40], [32, 36]]),
+      buns: bangs([[65, 38], [56, 40], [46, 40], [34, 38]])
     }[t.hair];
 
     // Long pointed side locks down past the jaw — the anime tell.
     var locks =
-      '<path d="M24,40 C19,52 19,66 23,78 L28,62 C26,54 25,46 27,41 Z"' + s + '/>' +
-      '<path d="M76,40 C81,52 81,66 77,78 L72,62 C74,54 75,46 73,41 Z"' + s + '/>';
+      '<path d="M24,34 C18,48 18,64 23,76 L29,58 C26,50 25,42 28,35 Z"' + s + '/>' +
+      '<path d="M76,34 C82,48 82,64 77,76 L71,58 C74,50 75,42 72,35 Z"' + s + '/>';
 
-    return locks + '<path d="' + fringe + '"' + s + '/>' +
+    return locks + '<path d="' + f.d + '"' + s + '/>' + f.strands +
       // narrow gloss band, following the curve of the skull
-      '<path d="M32,26 C39,19 61,19 68,26" fill="none" stroke="' + lift(base) +
-      '" stroke-width="3.6" stroke-linecap="round" opacity=".65"/>' +
-      // a couple of loose strands over the forehead
-      '<path d="M44,20 C46,28 45,36 43,42" fill="none" stroke="' + ink +
-      '" stroke-width="1" opacity=".35"/>' +
-      '<path d="M57,20 C55,28 56,36 58,42" fill="none" stroke="' + ink +
-      '" stroke-width="1" opacity=".35"/>';
+      '<path d="M33,20 C39,13 61,13 67,20" fill="none" stroke="' + lift(base) +
+      '" stroke-width="3.4" stroke-linecap="round" opacity=".6"/>';
   }
 
   function animeBody(t, skin) {
     var shade = mix(skin[0], skin[1], 0.55);
     return (
       // neck, with the jaw shadow that stops it looking like a pipe
-      '<path d="M44,78 C44,86 43,88 42,90 L58,90 C57,88 56,86 56,78 Z" fill="' +
+      '<path d="M45,75 C45,83 44,86 43,88 L57,88 C56,86 55,83 55,75 Z" fill="' +
         shade + '" stroke="' + mix(skin[1], INK, 0.42) + '" stroke-width="1.4" ' +
         'stroke-linejoin="round"/>' +
-      '<path d="M43,79 C46,84 54,84 57,79" fill="none" stroke="' + mix(skin[1], INK, 0.25) +
+      '<path d="M44,76 C47,81 53,81 56,76" fill="none" stroke="' + mix(skin[1], INK, 0.25) +
         '" stroke-width="2" opacity=".45"/>' +
       // shoulders
-      '<path d="M50,88 C36,88 22,93 18,100 L82,100 C78,93 64,88 50,88 Z" fill="' +
+      '<path d="M50,86 C36,86 22,92 18,100 L82,100 C78,92 64,86 50,86 Z" fill="' +
         t.clothes[0] + '" stroke="' + line(t.clothes[1]) + '" stroke-width="1.5" ' +
         'stroke-linejoin="round"/>' +
       // open collar
-      '<path d="M44,89 L50,97 L56,89" fill="' + t.clothes[1] + '" stroke="' +
+      '<path d="M44,87 L50,95 L56,87" fill="' + t.clothes[1] + '" stroke="' +
         line(t.clothes[1]) + '" stroke-width="1.3" stroke-linejoin="round"/>'
     );
   }
@@ -505,8 +524,12 @@
           ? '<path d="M' + n(cx + 3.4) + ',' + n(top + 1.8) +
             ' l1,2.2 2.2,1 -2.2,1 -1,2.2 -1,-2.2 -2.2,-1 2.2,-1 Z" fill="#fff"/>'
           : "") +
-        '<path d="' + g.upperLid(cx, ry, rx, drop) + '" fill="none" stroke="' + lash +
-          '" stroke-width="2.9" stroke-linecap="round"/>' +
+        (g.lash
+          ? '<path d="' + g.lash(cx, ry, rx, drop) + '" fill="' + lash + '"/>' +
+            '<path d="' + g.crease(cx, ry, rx, drop) + '" fill="none" stroke="' +
+              mix(t.skin[1], INK, 0.5) + '" stroke-width="1" stroke-linecap="round" opacity=".7"/>'
+          : '<path d="' + g.upperLid(cx, ry, rx, drop) + '" fill="none" stroke="' + lash +
+            '" stroke-width="2.9" stroke-linecap="round"/>') +
         '<path d="M' + (cx - 5) + ',' + n(g.eyeY + ry * 0.8) + ' Q' + cx + ',' +
           n(g.eyeY + ry * 0.98) + ' ' + (cx + 5) + ',' + n(g.eyeY + ry * 0.8) +
           '" fill="none" stroke="' + mix(t.skin[1], INK, 0.35) +
@@ -645,12 +668,13 @@
         '<circle cx="60.5" cy="' + (fy + 2.5) + '" r=".7"/></g>'
       : "";
 
-    var wy = g.whiskerY, wx = anime ? 29 : 24;
-    var whiskers =
-      '<g stroke="' + skinInk + '" stroke-width=".9" stroke-linecap="round" opacity=".4">' +
-      '<path d="M' + wx + ',' + wy + ' l6,-1.5 M' + (wx + 0.5) + ',' + (wy + 3.5) +
-      ' l6,-2.5 M' + (100 - wx) + ',' + wy + ' l-6,-1.5 M' + (100 - wx - 0.5) + ',' +
-      (wy + 3.5) + ' l-6,-2.5"/></g>';
+    var wy = g.whiskerY, wx = 24;
+    var whiskers = g.whiskers
+      ? '<g stroke="' + skinInk + '" stroke-width=".9" stroke-linecap="round" opacity=".4">' +
+        '<path d="M' + wx + ',' + wy + ' l6,-1.5 M' + (wx + 0.5) + ',' + (wy + 3.5) +
+        ' l6,-2.5 M' + (100 - wx) + ',' + wy + ' l-6,-1.5 M' + (100 - wx - 0.5) + ',' +
+        (wy + 3.5) + ' l-6,-2.5"/></g>'
+      : "";
 
     return (
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="' + size +
@@ -679,8 +703,10 @@
 
       '<path d="' + g.head + '" fill="url(#' + id + 'face)" stroke="' + skinInk +
         '" stroke-width="1.5" stroke-linejoin="round"/>' +
-      '<path d="' + g.jaw + '" fill="none" stroke="' + skinShade +
-        '" stroke-width="2" opacity=".3" stroke-linecap="round"/>' +
+      (g.jaw
+        ? '<path d="' + g.jaw + '" fill="none" stroke="' + skinShade +
+          '" stroke-width="2" opacity=".3" stroke-linecap="round"/>'
+        : "") +
 
       (anime ? animeHairFront(t) : chibiHairFront(t)) +
       whiskers + freckles + blush +
