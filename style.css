@@ -198,3 +198,5 @@ button.style[aria-pressed="true"] {
   color: var(--cyan);
   font-weight: 600;
 }
+
+#stage canvas, .gallery canvas { display: block; width: 100%; height: auto; }

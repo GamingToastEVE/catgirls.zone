@@ -26,11 +26,18 @@
   }
 
   function render(seed) {
-    stage.innerHTML = nyavatar(seed, { size: 512, style: style });
+    if (style === "painted") {
+      // the painted renderer returns a canvas, not markup
+      stage.innerHTML = "";
+      stage.appendChild(nyapaint(seed, { size: 512 }));
+    } else {
+      stage.innerHTML = nyavatar(seed, { size: 512, style: style });
+    }
 
-    var t = nyavatar.traits(seed);
+    var t = style === "painted" ? nyapaint.traits(seed) : nyavatar.traits(seed);
     var shown = [
-      ["ears", t.ears], ["hair", t.hair], ["eyes", t.eyes], ["mouth", t.mouth]
+      ["ears", t.ears], ["hair", t.hair],
+      ["eyes", t.eyes || t.eyeShape], ["mouth", t.mouth]
     ];
     if (t.extra !== "none") shown.push(["extra", t.extra]);
     if (t.heterochromia) shown.push(["eyes", "heterochromia"]);
@@ -51,6 +58,11 @@
 
   function current() { return input.value || "catgirl"; }
 
+  function syncDownloadLabel() {
+    document.getElementById("download").textContent =
+      style === "painted" ? "Download PNG" : "Download SVG";
+  }
+
   function randomSeed() {
     return NAMES[Math.floor(Math.random() * NAMES.length)] +
       (Math.random() < 0.4 ? "-" + Math.floor(Math.random() * 1000) : "");
@@ -66,11 +78,18 @@
   });
 
   document.getElementById("download").addEventListener("click", function () {
+    var name = current().replace(/[^a-z0-9_-]+/gi, "_") + "-" + style;
+    var a = document.createElement("a");
+    if (style === "painted") {
+      a.href = nyapaint.dataUrl(current(), { size: 1024 });
+      a.download = name + ".png";
+      a.click();
+      return;
+    }
     var blob = new Blob([nyavatar(current(), { size: 512, style: style })],
       { type: "image/svg+xml" });
-    var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = current().replace(/[^a-z0-9_-]+/gi, "_") + "-" + style + ".svg";
+    a.download = name + ".svg";
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   });
@@ -86,7 +105,9 @@
   }
 
   document.getElementById("copy-uri").addEventListener("click", function () {
-    copy(nyavatar.dataUri(current(), { size: 256, style: style }), "Data URI");
+    copy(style === "painted"
+      ? nyapaint.dataUrl(current(), { size: 256 })
+      : nyavatar.dataUri(current(), { size: 256, style: style }), "Data URI");
   });
 
   document.getElementById("copy-link").addEventListener("click", function () {
@@ -103,6 +124,7 @@
       });
       render(current());
       drawGallery();
+      syncDownloadLabel();
     });
   });
 
@@ -112,8 +134,15 @@
     gallery.innerHTML = "";
     NAMES.forEach(function (name) {
       var fig = document.createElement("figure");
-      fig.innerHTML = nyavatar(name, { size: 128, style: style }) +
-        "<figcaption>" + name + "</figcaption>";
+      if (style === "painted") {
+        fig.appendChild(nyapaint(name, { size: 128 }));
+        var cap = document.createElement("figcaption");
+        cap.textContent = name;
+        fig.appendChild(cap);
+      } else {
+        fig.innerHTML = nyavatar(name, { size: 128, style: style }) +
+          "<figcaption>" + name + "</figcaption>";
+      }
       fig.addEventListener("click", function () {
         input.value = name;
         render(name);
@@ -128,9 +157,11 @@
   var params = new URLSearchParams(location.search);
   if (params.get("seed")) input.value = params.get("seed");
   if (params.get("style") === "chibi") style = "chibi";
+  if (params.get("style") === "painted") style = "painted";
   styleButtons.forEach(function (b) {
     b.setAttribute("aria-pressed", String(b.dataset.style === style));
   });
+  syncDownloadLabel();
   render(current());
   drawGallery();
 })();
