@@ -20,21 +20,30 @@ face, no uploads and no avatar storage.
 ```html
 <script src="https://catgirls.zone/nyavatar.js"></script>
 <script>
-  el.innerHTML = nyavatar("mia");                       // SVG markup
+  el.innerHTML = nyavatar("mia");                        // SVG markup
+  el.innerHTML = nyavatar("mia", { style: "chibi" });    // the other style
   img.src      = nyavatar.dataUri("mia", { size: 128 }); // data: URI
   nyavatar.traits("mia");                                // trait object
 </script>
 ```
+
+### Styles
+
+`anime` (default) has a narrow face with a pointed chin, almond eyes, strand
+bangs with long side locks, and a visible neck and shoulders. `chibi` has an
+oversized round head, huge circular eyes and no neck. Traits are shared — the
+same seed is the same character in either style, just drawn differently.
 
 Also works as a CommonJS module (`require("./nyavatar.js")`) for server-side
 rendering.
 
 ### Options
 
-| Option  | Default | Meaning                             |
-| ------- | ------- | ----------------------------------- |
-| `size`  | `256`   | width/height in px (viewBox is 100) |
-| `round` | `true`  | rounded-corner clip                 |
+| Option  | Default   | Meaning                             |
+| ------- | --------- | ----------------------------------- |
+| `size`  | `256`     | width/height in px (viewBox is 100) |
+| `style` | `"anime"` | `"anime"` or `"chibi"`              |
+| `round` | `true`    | rounded-corner clip                 |
 
 ### Traits
 
@@ -42,9 +51,9 @@ ears (5) · hair style (7) · hair color (14) · eyes (6) · eye color (10) ·
 mouth (5) · skin (6) · clothing (6) · background (6) · accessory (4) ·
 blush · freckles · heterochromia · head tilt.
 
-Everything is drawn in a chibi style: oversized round head, eyes taking up
-about a third of the face with gradient irises and stacked highlights, tiny
-nose and mouth, token shoulders. Outlines are never black — each shape's
+Eyes carry most of the work: gradient iris, dark rim, deep pupil, a pool of
+reflected light low in the iris, an upper-lid shadow, two highlights, and a
+thick lash line with an outer flick. Outlines are never black — each shape's
 stroke is its own fill mixed toward a single ink tone, which is what keeps it
 looking drawn instead of clip-arted.
 

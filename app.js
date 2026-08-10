@@ -7,6 +7,9 @@
   var traitsEl = document.getElementById("traits");
   var gallery = document.getElementById("gallery");
   var toastEl = document.getElementById("toast");
+  var styleButtons = [].slice.call(document.querySelectorAll("button.style"));
+
+  var style = "anime";
 
   var NAMES = [
     "nyanpasu", "mikoto", "tabby", "sudo", "421", "espresso", "voidcat",
@@ -23,7 +26,7 @@
   }
 
   function render(seed) {
-    stage.innerHTML = nyavatar(seed, { size: 512 });
+    stage.innerHTML = nyavatar(seed, { size: 512, style: style });
 
     var t = nyavatar.traits(seed);
     var shown = [
@@ -40,6 +43,7 @@
     // Keep the URL shareable without spamming history.
     var url = new URL(location.href);
     url.searchParams.set("seed", seed);
+    url.searchParams.set("style", style);
     history.replaceState(null, "", url);
 
     document.title = seed + " — catgirls.zone";
@@ -62,10 +66,11 @@
   });
 
   document.getElementById("download").addEventListener("click", function () {
-    var blob = new Blob([nyavatar(current(), { size: 512 })], { type: "image/svg+xml" });
+    var blob = new Blob([nyavatar(current(), { size: 512, style: style })],
+      { type: "image/svg+xml" });
     var a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = current().replace(/[^a-z0-9_-]+/gi, "_") + ".svg";
+    a.download = current().replace(/[^a-z0-9_-]+/gi, "_") + "-" + style + ".svg";
     a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
   });
@@ -81,30 +86,51 @@
   }
 
   document.getElementById("copy-uri").addEventListener("click", function () {
-    copy(nyavatar.dataUri(current(), { size: 256 }), "Data URI");
+    copy(nyavatar.dataUri(current(), { size: 256, style: style }), "Data URI");
   });
 
   document.getElementById("copy-link").addEventListener("click", function () {
     copy(location.href, "Link");
   });
 
+  /* ---- style switch ---- */
+
+  styleButtons.forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      style = btn.dataset.style;
+      styleButtons.forEach(function (b) {
+        b.setAttribute("aria-pressed", String(b === btn));
+      });
+      render(current());
+      drawGallery();
+    });
+  });
+
   /* ---- gallery ---- */
 
-  NAMES.forEach(function (name) {
-    var fig = document.createElement("figure");
-    fig.innerHTML = nyavatar(name, { size: 128 }) +
-      "<figcaption>" + name + "</figcaption>";
-    fig.addEventListener("click", function () {
-      input.value = name;
-      render(name);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+  function drawGallery() {
+    gallery.innerHTML = "";
+    NAMES.forEach(function (name) {
+      var fig = document.createElement("figure");
+      fig.innerHTML = nyavatar(name, { size: 128, style: style }) +
+        "<figcaption>" + name + "</figcaption>";
+      fig.addEventListener("click", function () {
+        input.value = name;
+        render(name);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      });
+      gallery.appendChild(fig);
     });
-    gallery.appendChild(fig);
-  });
+  }
 
   /* ---- boot ---- */
 
-  var fromUrl = new URLSearchParams(location.search).get("seed");
-  if (fromUrl) input.value = fromUrl;
+  var params = new URLSearchParams(location.search);
+  if (params.get("seed")) input.value = params.get("seed");
+  if (params.get("style") === "chibi") style = "chibi";
+  styleButtons.forEach(function (b) {
+    b.setAttribute("aria-pressed", String(b.dataset.style === style));
+  });
   render(current());
+  drawGallery();
 })();

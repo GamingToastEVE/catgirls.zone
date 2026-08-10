@@ -28,6 +28,11 @@
         <label for="seed">Seed — a name, an email, a user ID, anything</label>
         <input id="seed" type="text" value="mia" autocomplete="off" spellcheck="false">
 
+        <div class="row" role="group" aria-label="Art style">
+          <button class="style" data-style="anime" aria-pressed="true">Anime</button>
+          <button class="style" data-style="chibi" aria-pressed="false">Chibi</button>
+        </div>
+
         <div class="row">
           <button class="primary" id="randomize">Randomize</button>
           <button id="download">Download SVG</button>
@@ -52,11 +57,11 @@
 
 <pre><code>&lt;script src="https://catgirls.zone/nyavatar.js"&gt;&lt;/script&gt;
 &lt;script&gt;
-  // full SVG markup
+  // full SVG markup — anime by default, or { style: "chibi" }
   container.innerHTML = nyavatar(user.email);
 
   // or as an image source
-  img.src = nyavatar.dataUri(user.id, { size: 128 });
+  img.src = nyavatar.dataUri(user.id, { size: 128, style: "chibi" });
 
   // or just the traits, if you want to draw it yourself
   nyavatar.traits("mia");
