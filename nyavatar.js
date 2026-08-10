@@ -40,7 +40,12 @@
 
   /* ---------- color utils --------------------------------------------- */
 
-  var INK = [58, 44, 72]; // the one dark tone every outline mixes toward
+  // The tone every outline mixes toward. Anime art lines are warm and much
+  // lower contrast than a flat dark outline, so each style picks its own.
+  // Set once per render at the top of svg(); rendering is synchronous.
+  var INK_DARK = [58, 44, 72];
+  var INK_WARM = [138, 96, 88];
+  var INK = INK_DARK;
 
   function rgb(hex) {
     hex = hex.replace("#", "");
@@ -65,7 +70,7 @@
 
   // Outlines are never pure black — they're the base color pushed toward INK,
   // which is what keeps the whole thing looking drawn rather than clip-arted.
-  function line(c) { return mix(c, INK, 0.62); }
+  function line(c) { return mix(c, INK, INK === INK_WARM ? 0.45 : 0.62); }
   function lift(c) { return mix(c, [255, 255, 255], 0.42); }
 
   /* ---------- trait tables -------------------------------------------- */
@@ -106,6 +111,12 @@
     ["#222a3d", "#38446a"], ["#2c3524", "#48553a"], ["#3a2d20", "#5c4835"]
   ];
 
+  // Anime portraits sit on soft paper, not a dark vignette.
+  var BACKGROUNDS_SOFT = [
+    ["#f7ecd8", "#fffaf0"], ["#e6f2ea", "#f7fdf8"], ["#f7e7ee", "#fff7fb"],
+    ["#e7ecf7", "#f8fbff"], ["#f2f0e2", "#fdfcf2"], ["#f7ebe2", "#fff8f2"]
+  ];
+
   /* ---------- helpers -------------------------------------------------- */
 
   function pick(r, arr) { return arr[Math.floor(r() * arr.length)]; }
@@ -116,11 +127,21 @@
   }
   function n(v) { return Math.round(v * 100) / 100; }
 
+  // Four-pointed star with concave sides.
+  function sparkle(x, y, r) {
+    var i = r * 0.22;
+    return '<path d="M' + x + ',' + (y - r) +
+      ' C' + x + ',' + (y - i) + ' ' + (x + i) + ',' + y + ' ' + (x + r) + ',' + y +
+      ' C' + (x + i) + ',' + y + ' ' + x + ',' + (y + i) + ' ' + x + ',' + (y + r) +
+      ' C' + x + ',' + (y + i) + ' ' + (x - i) + ',' + y + ' ' + (x - r) + ',' + y +
+      ' C' + (x - i) + ',' + y + ' ' + x + ',' + (y - i) + ' ' + x + ',' + (y - r) + ' Z"/>';
+  }
+
   /* ---------- traits --------------------------------------------------- */
 
   function traits(seed) {
     var r = rng(hash(String(seed)));
-    return {
+    return withBg({
       seed: String(seed),
       ears: pick(r, EARS),
       hair: pick(r, HAIR),
@@ -131,13 +152,18 @@
       eyeColor: pick(r, EYE_COLORS),
       skin: pick(r, SKINS),
       clothes: pick(r, CLOTHES),
-      bg: pick(r, BACKGROUNDS),
+      bgIndex: Math.floor(r() * BACKGROUNDS.length),
       blush: r() < 0.7,
       freckles: r() < 0.28,
       heterochromia: r() < 0.12,
       altEyeColor: pick(r, EYE_COLORS),
       tilt: (r() * 7 - 3.5).toFixed(2)
-    };
+    });
+  }
+
+  function withBg(t) {
+    t.bg = BACKGROUNDS[t.bgIndex];
+    return t;
   }
 
   /* =====================================================================
@@ -186,10 +212,12 @@
     head: "M50,15 C64,15 72,25 72,41 C72,50 70,57 66,64 " +
           "C62,71 56,80 50,82 C44,80 38,71 34,64 " +
           "C30,57 28,50 28,41 C28,25 36,15 50,15 Z",
-    eyeY: 53, eyeL: 39, eyeR: 61, eyeRX: 7.4, eyeRY: 8,
-    browY: 40, noseY: 63, mouthY: 70, blushY: 60, blushX: 33,
+    eyeY: 54, eyeL: 38.5, eyeR: 61.5, eyeRX: 8.4, eyeRY: 10,
+    browY: 39, noseY: 65, mouthY: 71, blushY: 62, blushX: 32,
     whiskers: false, // on a narrow face they read as scars, not whiskers
     jaw: "",
+    glossy: true,  // extra highlight layers and lower lashes
+    lift: -8,      // head rides higher so the torso has somewhere to go
 
     // Almond: inner corner low, outer corner high, peak toward the outside.
     eyeShape: function (cx, ry, rx) {
@@ -279,7 +307,15 @@
         ' C' + (lx + 12) + ',' + (ly + 10) + ' 38,23 40,27 Z" fill="' + inner + '"/>' +
       '<path d="M70,30 C73,24 ' + (rx - 4) + ',18 ' + (rx - 4) + ',' + (ry + 5) +
         ' C' + (rx - 12) + ',' + (ry + 10) + ' 62,23 60,27 Z" fill="' + inner + '"/>' +
-      tuft;
+      tuft +
+      // inner fur — the fluff is most of what makes them read as cat ears
+      (anime
+        ? '<g fill="' + lift(base) + '" opacity=".85">' +
+          '<path d="M31,29 C29,24 ' + (lx + 6) + ',20 ' + (lx + 6) + ',' + (ly + 8) +
+            ' C' + (lx + 12) + ',' + (ly + 12) + ' 37,23 39,27 Z"/>' +
+          '<path d="M69,29 C71,24 ' + (rx - 6) + ',20 ' + (rx - 6) + ',' + (ry + 8) +
+            ' C' + (rx - 12) + ',' + (ry + 12) + ' 63,23 61,27 Z"/></g>'
+        : "");
   }
 
   /* ---------- hair: chibi ----------------------------------------------- */
@@ -376,22 +412,22 @@
     switch (t.hair) {
       case "long":
         return '<path d="M19,46 C19,11 33,2 50,2 C67,2 81,11 81,46 ' +
-               'C81,66 85,86 87,100 L73,100 L70,86 L67,100 L33,100 L30,86 ' +
-               'L27,100 L13,100 C15,86 19,66 19,46 Z"' + s + '/>';
+               'C81,66 85,86 87,118 L73,118 L70,86 L67,118 L33,118 L30,86 ' +
+               'L27,118 L13,118 C15,86 19,66 19,46 Z"' + s + '/>';
       case "hime":
         return '<path d="M19,46 C19,11 33,2 50,2 C67,2 81,11 81,46 ' +
-               'C81,68 84,88 84,100 L16,100 C16,88 19,68 19,46 Z"' + s + '/>' +
-               '<path d="M23,42 C17,58 16,80 18,100 L31,100 C26,80 26,58 29,44 Z"' + s + '/>' +
-               '<path d="M77,42 C83,58 84,80 82,100 L69,100 C74,80 74,58 71,44 Z"' + s + '/>';
+               'C81,68 84,88 84,118 L16,118 C16,88 19,68 19,46 Z"' + s + '/>' +
+               '<path d="M23,42 C17,58 16,80 18,118 L31,118 C26,80 26,58 29,44 Z"' + s + '/>' +
+               '<path d="M77,42 C83,58 84,80 82,118 L69,118 C74,80 74,58 71,44 Z"' + s + '/>';
       case "twintails":
         return cap +
-          '<path d="M24,34 C8,40 4,66 8,84 C10,94 12,100 16,100 L28,100 ' +
+          '<path d="M24,34 C8,40 4,66 8,84 C10,94 12,118 16,118 L28,118 ' +
           'C21,84 19,60 31,40 Z"' + s + '/>' +
-          '<path d="M76,34 C92,40 96,66 92,84 C90,94 88,100 84,100 L72,100 ' +
+          '<path d="M76,34 C92,40 96,66 92,84 C90,94 88,118 84,118 L72,118 ' +
           'C79,84 81,60 69,40 Z"' + s + '/>';
       case "ponytail":
         return cap +
-          '<path d="M74,28 C94,36 96,70 90,92 C88,99 84,100 84,92 ' +
+          '<path d="M74,28 C94,36 96,70 90,92 C88,99 84,118 84,92 ' +
           'C88,64 86,42 69,34 Z"' + s + '/>';
       case "buns":
         return cap +
@@ -458,22 +494,45 @@
       '" stroke-width="3.4" stroke-linecap="round" opacity=".6"/>';
   }
 
-  function animeBody(t, skin) {
-    var shade = mix(skin[0], skin[1], 0.55);
+  function animeBody(t, skin, extra) {
+    var base = skin[0], shade = skin[1], ink = mix(shade, INK, 0.4);
+    var soft = mix(base, shade, 0.55);
+
+    var pendant = extra === "bell"
+      ? '<circle cx="50" cy="86.5" r="3.6" fill="#ffd166" stroke="#c8951f" stroke-width="1"/>' +
+        '<path d="M50,84.8 v3.4 M46.8,86.5 h6.4" stroke="#c8951f" stroke-width=".9"/>'
+      // a little heart, straight off the reference
+      : '<path d="M50,85.6 C49,83.6 46.6,83.6 46.6,85.6 C46.6,87.4 48.6,88.5 50,89.6 ' +
+        'C51.4,88.5 53.4,87.4 53.4,85.6 C53.4,83.6 51,83.6 50,85.6 Z" fill="#ffd166" ' +
+        'stroke="#c8951f" stroke-width=".9" stroke-linejoin="round"/>';
+
     return (
-      // neck, with the jaw shadow that stops it looking like a pipe
-      '<path d="M45,75 C45,83 44,86 43,88 L57,88 C56,86 55,83 55,75 Z" fill="' +
-        shade + '" stroke="' + mix(skin[1], INK, 0.42) + '" stroke-width="1.4" ' +
-        'stroke-linejoin="round"/>' +
-      '<path d="M44,76 C47,81 53,81 56,76" fill="none" stroke="' + mix(skin[1], INK, 0.25) +
-        '" stroke-width="2" opacity=".45"/>' +
-      // shoulders
-      '<path d="M50,86 C36,86 22,92 18,100 L82,100 C78,92 64,86 50,86 Z" fill="' +
-        t.clothes[0] + '" stroke="' + line(t.clothes[1]) + '" stroke-width="1.5" ' +
-        'stroke-linejoin="round"/>' +
-      // open collar
-      '<path d="M44,87 L50,95 L56,87" fill="' + t.clothes[1] + '" stroke="' +
-        line(t.clothes[1]) + '" stroke-width="1.3" stroke-linejoin="round"/>'
+      // neck
+      '<path d="M44,66 C44,74 43,77 41,80 L59,80 C57,77 56,74 56,66 Z" fill="' + soft +
+        '" stroke="' + ink + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+      '<path d="M43,67 C46,73 54,73 57,67" fill="none" stroke="' + mix(shade, INK, 0.2) +
+        '" stroke-width="2" opacity=".4"/>' +
+      // bare shoulders and chest
+      '<path d="M50,79 C33,79 18,88 13,118 L87,118 C82,88 67,79 50,79 Z" fill="' + base +
+        '" stroke="' + ink + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+      '<g fill="none" stroke="' + shade + '" stroke-width="1.1" stroke-linecap="round" opacity=".38">' +
+      '<path d="M41,88 C43.5,90.5 45.5,91.5 47,91"/>' +
+      '<path d="M59,88 C56.5,90.5 54.5,91.5 53,91"/></g>' +
+      // off-shoulder top, drawn as one connected garment: sleeve puffs sitting
+      // below the shoulders, a scooped neckline between them
+      '<path d="M11,118 C11,93 15,88 22,87 C29,86 33,91 38,93 ' +
+        'C42,94.5 46,95 50,95 C54,95 58,94.5 62,93 ' +
+        'C67,91 71,86 78,87 C85,88 89,93 89,118 Z" fill="' + t.clothes[0] +
+        '" stroke="' + line(t.clothes[1]) + '" stroke-width="1.3" stroke-linejoin="round"/>' +
+      '<path d="M38,93 C42,94.5 46,95 50,95 C54,95 58,94.5 62,93" fill="none" stroke="' +
+        t.clothes[1] + '" stroke-width="1.3" opacity=".8"/>' +
+      // the seam where each sleeve meets the bodice
+      '<g fill="none" stroke="' + t.clothes[1] + '" stroke-width="1" opacity=".5">' +
+      '<path d="M27,89 C26,93 26,97 27,118"/><path d="M73,89 C74,93 74,97 73,118"/></g>' +
+      // choker
+      '<path d="M42,77 C45,79.5 55,79.5 58,77 L58,80.5 C55,83 45,83 42,80.5 Z" fill="#f2607d" ' +
+        'stroke="' + line("#f2607d") + '" stroke-width="1.2" stroke-linejoin="round"/>' +
+      pendant
     );
   }
 
@@ -489,6 +548,8 @@
         (g.eyeY - 5) + ' ' + (cx + 7) + ',' + (g.eyeY + 1) +
         '" fill="none" stroke="' + lash + '" stroke-width="2.4" stroke-linecap="round"/>';
     }
+
+    function o(cx) { return cx < 50 ? -1 : 1; }
 
     function openEye(cx, color, i) {
       var rx = g.eyeRX, ry = g.eyeRY, drop = 0;
@@ -518,8 +579,15 @@
         '<path d="' + shape + '" fill="none" stroke="' + mix(color, INK, 0.65) +
           '" stroke-width="3" opacity=".5" transform="translate(0,-2)"/>' +
         '</g>' +
-        '<circle cx="' + n(cx - 2.7) + '" cy="' + n(top + 3.8) + '" r="2.4" fill="#fff"/>' +
-        '<circle cx="' + n(cx + 2.8) + '" cy="' + n(g.eyeY + 4.4) + '" r="1.2" fill="#fff" opacity=".9"/>' +
+        // highlights, stacked: broad sheen across the top of the iris, a round
+        // catchlight, and a small glint low on the far side
+        (g.glossy
+          ? '<g clip-path="url(#' + id + 'e' + i + ')">' +
+            '<ellipse cx="' + cx + '" cy="' + n(top + 4) + '" rx="' + n(rx * 0.72) +
+              '" ry="' + n(ry * 0.3) + '" fill="#fff" opacity=".55"/></g>'
+          : "") +
+        '<circle cx="' + n(cx - 2.7) + '" cy="' + n(top + 3.8) + '" r="2.6" fill="#fff"/>' +
+        '<circle cx="' + n(cx + 2.8) + '" cy="' + n(g.eyeY + 4.4) + '" r="1.3" fill="#fff" opacity=".95"/>' +
         (t.eyes === "sparkle"
           ? '<path d="M' + n(cx + 3.4) + ',' + n(top + 1.8) +
             ' l1,2.2 2.2,1 -2.2,1 -1,2.2 -1,-2.2 -2.2,-1 2.2,-1 Z" fill="#fff"/>'
@@ -533,7 +601,13 @@
         '<path d="M' + (cx - 5) + ',' + n(g.eyeY + ry * 0.8) + ' Q' + cx + ',' +
           n(g.eyeY + ry * 0.98) + ' ' + (cx + 5) + ',' + n(g.eyeY + ry * 0.8) +
           '" fill="none" stroke="' + mix(t.skin[1], INK, 0.35) +
-          '" stroke-width="1" stroke-linecap="round" opacity=".75"/>'
+          '" stroke-width="1" stroke-linecap="round" opacity=".75"/>' +
+        // short lower lashes at the outer corner
+        (g.glossy
+          ? '<path d="M' + n(cx + o(cx) * rx * 0.8) + ',' + n(g.eyeY + ry * 0.66) +
+            ' l' + n(o(cx) * 2) + ',2.2" stroke="' + lash +
+            '" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".75"/>'
+          : "")
       );
     }
 
@@ -635,7 +709,10 @@
     var t = traits(seed);
     var size = opts.size || 256;
     var id = "n" + hash(String(seed)).toString(36) + style.charAt(0) + "_";
-    var skin = t.skin[0], skinShade = t.skin[1], skinInk = mix(skinShade, INK, 0.42);
+    INK = anime ? INK_WARM : INK_DARK;
+    var bg = (anime ? BACKGROUNDS_SOFT : BACKGROUNDS)[t.bgIndex];
+    var skin = t.skin[0], skinShade = t.skin[1];
+    var skinInk = mix(skinShade, INK, anime ? 0.3 : 0.42);
 
     var defsEyes = [t.eyeColor, t.heterochromia ? t.altEyeColor : t.eyeColor]
       .map(function (c, i) {
@@ -650,14 +727,17 @@
       }).join("");
 
     var bx = g.blushX, by = g.blushY;
-    var blush = t.blush
-      ? '<g opacity=".5"><ellipse cx="' + bx + '" cy="' + by + '" rx="6" ry="3.6" fill="#ff8fa3"/>' +
-        '<ellipse cx="' + (100 - bx) + '" cy="' + by + '" rx="6" ry="3.6" fill="#ff8fa3"/></g>' +
-        '<g stroke="#ff7d97" stroke-width="1" stroke-linecap="round" opacity=".45">' +
-        '<path d="M' + (bx - 3) + ',' + (by - 1) + ' l3,-2 M' + bx + ',' + (by + 1.5) +
-        ' l3,-2 M' + (100 - bx + 3) + ',' + (by - 1) + ' l-3,-2 M' + (100 - bx) + ',' +
-        (by + 1.5) + ' l-3,-2"/></g>'
-      : "";
+    var blush = !t.blush ? ""
+      : anime
+        // soft fade, no hatching — drawn strokes read as crayon at this size
+        ? '<ellipse cx="' + bx + '" cy="' + by + '" rx="7" ry="4.4" fill="url(#' + id + 'bl)"/>' +
+          '<ellipse cx="' + (100 - bx) + '" cy="' + by + '" rx="7" ry="4.4" fill="url(#' + id + 'bl)"/>'
+        : '<g opacity=".5"><ellipse cx="' + bx + '" cy="' + by + '" rx="6" ry="3.6" fill="#ff8fa3"/>' +
+          '<ellipse cx="' + (100 - bx) + '" cy="' + by + '" rx="6" ry="3.6" fill="#ff8fa3"/></g>' +
+          '<g stroke="#ff7d97" stroke-width="1" stroke-linecap="round" opacity=".45">' +
+          '<path d="M' + (bx - 3) + ',' + (by - 1) + ' l3,-2 M' + bx + ',' + (by + 1.5) +
+          ' l3,-2 M' + (100 - bx + 3) + ',' + (by - 1) + ' l-3,-2 M' + (100 - bx) + ',' +
+          (by + 1.5) + ' l-3,-2"/></g>';
 
     var fy = g.noseY + 1;
     var freckles = t.freckles
@@ -682,24 +762,38 @@
       esc(seed) + '">' +
       '<defs>' +
       '<radialGradient id="' + id + 'bg" cx="50%" cy="32%" r="78%">' +
-      '<stop offset="0%" stop-color="' + t.bg[1] + '"/>' +
-      '<stop offset="100%" stop-color="' + t.bg[0] + '"/></radialGradient>' +
+      '<stop offset="0%" stop-color="' + bg[1] + '"/>' +
+      '<stop offset="100%" stop-color="' + bg[0] + '"/></radialGradient>' +
       '<radialGradient id="' + id + 'face" cx="50%" cy="40%" r="62%">' +
       '<stop offset="58%" stop-color="' + skin + '"/>' +
       '<stop offset="100%" stop-color="' + mix(skin, skinShade, 0.7) + '"/></radialGradient>' +
       defsEyes +
+      '<radialGradient id="' + id + 'bl">' +
+      '<stop offset="0%" stop-color="#ff8fa3" stop-opacity=".6"/>' +
+      '<stop offset="100%" stop-color="#ff8fa3" stop-opacity="0"/></radialGradient>' +
       '<clipPath id="' + id + 'c"><rect width="100" height="100" rx="' +
       (opts.round === false ? 0 : 16) + '"/></clipPath>' +
       '</defs>' +
 
       '<g clip-path="url(#' + id + 'c)">' +
       '<rect width="100" height="100" fill="url(#' + id + 'bg)"/>' +
-      '<circle cx="50" cy="' + (anime ? 42 : 46) + '" r="40" fill="#fff" opacity=".05"/>' +
+      (anime
+        // little sparkles in the empty corners, like the reference art
+        ? '<g fill="#fff2b8" stroke="' + mix(bg[0], INK, 0.25) + '" stroke-width=".5">' +
+          sparkle(13, 22, 3.4) + sparkle(87, 30, 2.6) + sparkle(20, 68, 2.2) +
+          sparkle(84, 60, 3) + '</g>'
+        : '<circle cx="50" cy="46" r="40" fill="#fff" opacity=".05"/>') +
 
-      '<g transform="rotate(' + t.tilt + ' 50 55)">' +
+      // pulled back so the shoulders fit in frame instead of running off it
+      (anime ? '<g transform="translate(50,54) scale(.84) translate(-50,-54)">' : "") +
+
+      // the torso is drawn outside the head group so only the head tilts
+      (anime ? animeBody(t, t.skin, t.extra) : "") +
+
+      '<g transform="translate(0,' + (g.lift || 0) + ') rotate(' + t.tilt + ' 50 55)">' +
       (anime ? animeHairBack(t) : chibiHairBack(t)) +
       drawEars(t, g, anime) +
-      (anime ? animeBody(t, t.skin) : chibiBody(t, t.skin)) +
+      (anime ? "" : chibiBody(t, t.skin)) +
 
       '<path d="' + g.head + '" fill="url(#' + id + 'face)" stroke="' + skinInk +
         '" stroke-width="1.5" stroke-linejoin="round"/>' +
@@ -712,8 +806,9 @@
       whiskers + freckles + blush +
       drawEyes(t, g, id) +
       drawFace(t, g) +
-      drawExtra(t, anime) +
-      '</g></g></svg>'
+      // the bell rides on the choker, which the torso already drew
+      (anime && t.extra === "bell" ? "" : drawExtra(t, anime)) +
+      '</g>' + (anime ? '</g>' : "") + '</g></svg>'
     );
   }
 

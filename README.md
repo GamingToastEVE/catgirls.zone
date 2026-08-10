@@ -29,10 +29,11 @@ face, no uploads and no avatar storage.
 
 ### Styles
 
-`anime` (default) has a narrow face with a pointed chin, almond eyes, strand
-bangs with long side locks, and a visible neck and shoulders. `chibi` has an
-oversized round head, huge circular eyes and no neck. Traits are shared — the
-same seed is the same character in either style, just drawn differently.
+`anime` (default) is a soft portrait: pastel paper background with sparkles,
+warm low-contrast outlines, large glossy eyes, fluffy ears, and a torso with a
+choker and an off-shoulder top. `chibi` is the cartoon version — oversized
+round head, huge circular eyes, no neck, dark saturated background. Traits are
+shared, so the same seed is the same character in either style.
 
 Also works as a CommonJS module (`require("./nyavatar.js")`) for server-side
 rendering.
