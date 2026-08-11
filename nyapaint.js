@@ -157,12 +157,15 @@
 
   // The head sits low enough that the ears have room above the hair, which
   // is where they belong — drawn under it they simply vanished.
-  var HEAD = "M50,22 C64,22 71,31 71,45 C71,56 68,62 63,67 " +
-             "C59,72 54,76 50,76 C46,76 41,72 37,67 " +
-             "C32,62 29,56 29,45 C29,31 36,22 50,22 Z";
+  // Measured against the reference: the visible face — bangs to chin — covers
+  // only about a fifth of the frame. Drawing it a third of the frame tall was
+  // the single biggest thing making the portrait look wrong.
+  var HEAD = "M50,26 C62,26 68,34 68,46 C68,54 66,59 62,63 " +
+             "C58,67.5 54,70 50,70 C46,70 42,67.5 38,63 " +
+             "C34,59 32,54 32,46 C32,34 38,26 50,26 Z";
 
-  var EYE = { y: 53, l: 39.2, r: 60.8, rx: 6.2, ry: 6.8 };
-  var BROW_Y = 41, NOSE_Y = 61, MOUTH_Y = 66.5, BLUSH_Y = 59;
+  var EYE = { y: 55.5, l: 40.4, r: 59.6, rx: 5.8, ry: 5.4 };
+  var BROW_Y = 49.5, NOSE_Y = 61.5, MOUTH_Y = 64.8, BLUSH_Y = 58.5;
 
   // Hair silhouettes: [backPath, hasVolumeSides]
   function hairBackPath(t) {
@@ -175,10 +178,10 @@
                "C50,86 46,79 46,79 C42,86 36,84 32,77 " +
                "C29,84 23,86 19,80 C16,72 14,62 14,48 C14,26 28,10 50,10 Z";
       case "hime":
-        return "M50,9 C73,9 87,25 87,48 C87,70 90,90 91,112 L74,112 " +
-               "C76,92 78,74 77,58 C74,78 72,96 71,112 L29,112 " +
-               "C28,96 26,78 23,58 C22,74 24,92 26,112 L9,112 " +
-               "C10,90 13,70 13,48 C13,25 27,9 50,9 Z";
+        return "M50,9 C74,9 88,25 88,48 C88,72 93,94 95,118 L74,118 " +
+               "C77,96 79,76 78,58 C74,80 72,98 71,118 L29,118 " +
+               "C28,98 26,80 22,58 C21,76 23,96 26,118 L5,118 " +
+               "C7,94 12,72 12,48 C12,25 26,9 50,9 Z";
       case "twintails":
         return "M50,10 C72,10 86,26 86,48 L86,66 C68,74 32,74 14,66 L14,48 " +
                "C14,26 28,10 50,10 Z" +
@@ -197,22 +200,24 @@
                "M15,27 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z" +
                "M85,27 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z";
       default: // long
-        return "M50,9 C73,9 87,25 87,48 C87,66 90,86 93,112 L74,112 " +
-               "C77,92 78,74 76,60 C73,80 70,96 68,112 L32,112 " +
-               "C30,96 27,80 24,60 C22,74 23,92 26,112 L7,112 " +
-               "C10,86 13,66 13,48 C13,25 27,9 50,9 Z";
+        return "M50,9 C75,9 89,27 90,48 C91,64 96,80 97,96 " +
+               "C98,106 94,114 90,118 L74,118 " +
+               "C80,100 82,82 79,64 C76,84 72,102 70,118 L30,118 " +
+               "C28,102 24,84 21,64 C18,82 20,100 26,118 L10,118 " +
+               "C6,114 2,106 3,96 C4,80 9,64 10,48 C11,27 25,9 50,9 Z";
     }
   }
 
   // Bang tips, right to left. y is where the strand ends.
   function bangTips(t) {
     switch (t.hair) {
-      case "hime":  return [[70, 39], [61, 40], [50, 39], [39, 40], [30, 39]];
-      case "bob":   return [[69, 37], [60, 40], [50, 36], [40, 40], [31, 37]];
-      case "buns":  return [[68, 36], [58, 39], [48, 39], [34, 36]];
-      case "ponytail": return [[67, 36], [56, 41], [45, 39], [32, 35]];
-      case "twintails": return [[68, 37], [59, 40], [50, 36], [41, 40], [32, 37]];
-      default:      return [[70, 38], [61, 41], [50, 37], [39, 41], [30, 38]];
+      // Staggered lengths: an even row of tips draws a straight hem.
+      case "hime":  return [[69, 47], [62, 52], [55, 48], [46, 53], [39, 48], [31, 51]];
+      case "bob":   return [[68, 45], [61, 51], [54, 46], [46, 52], [39, 47], [32, 50]];
+      case "buns":  return [[67, 44], [58, 50], [50, 45], [42, 51], [33, 46]];
+      case "ponytail": return [[66, 43], [57, 50], [49, 45], [41, 51], [33, 46]];
+      case "twintails": return [[68, 45], [61, 51], [54, 46], [46, 52], [39, 47], [32, 50]];
+      default:      return [[69, 46], [62, 53], [55, 47], [46, 54], [39, 48], [31, 51]];
     }
   }
 
@@ -293,22 +298,41 @@
 
     sparkles(g, t);
 
+    // Pull back: the reference leaves air around the figure, mine filled the
+    // frame edge to edge.
+    ctx.translate(50, 58); ctx.scale(0.8, 0.8); ctx.translate(-50, -58);
     // everything below is drawn tilted, like a portrait on a slight angle
     ctx.translate(50, 52); ctx.rotate(t.tilt * Math.PI / 180); ctx.translate(-50, -52);
 
+    /* ---- head group: lifted so the torso has room in frame ---- */
+    ctx.save();
+    ctx.translate(0, -10);
+
     /* ---- back hair ---- */
+    // Spread the mass sideways: hair that hugs the skull reads as a helmet.
+    ctx.save();
+    ctx.translate(50, 40); ctx.scale(1.12, 1.04); ctx.translate(-50, -40);
     var back = g.path(hairBackPath(t));
     var hairGrad = ctx.createLinearGradient(0, 4, 0, 100);
     hairGrad.addColorStop(0, hair[0]);
     hairGrad.addColorStop(0.45, hair[1]);
     hairGrad.addColorStop(1, hair[2]);
     g.fill(back, hairGrad);
-    g.soft({ path: g.path("M50,40 m-46,0 a46,46 0 1,0 92,0 a46,46 0 1,0 -92,0"),
-             clip: back, color: shadowOf(hair[2], 0.5), alpha: 0.25, blur: 6 });
+    // shade only where the hair turns away from the light, not a disc over
+    // the whole mass — that had painted a dark column down the middle
+    g.soft({ path: g.path("M50,4 C22,4 8,30 6,70 L2,70 L2,0 L98,0 L98,70 L94,70 " +
+                          "C92,30 78,4 50,4 Z"),
+             clip: back, color: shadowOf(hair[2], 0.5), alpha: 0.3, blur: 6 });
     g.ink(back, hairLine, 0.62);
+    ctx.restore();
+
+    ctx.restore();  // end head lift — the torso is drawn in frame coordinates
 
     /* ---- torso ---- */
     torso(g, ctx, t, skin, cloth, skinLine);
+
+    ctx.save();
+    ctx.translate(0, -10);
 
     /* ---- head ---- */
     var head = g.path(HEAD);
@@ -319,25 +343,25 @@
     g.fill(head, faceGrad);
 
     // modelling: hair shadow across the forehead, temples, jaw, chin
-    g.soft({ path: g.path("M24,0 C24,30 34,36 50,36 C66,36 76,30 76,0 Z"),
-             clip: head, color: shadowOf(skin[2], 0.35), alpha: 0.55, blur: 3.5 });
-    g.soft({ path: g.path("M30,34 C28,48 32,60 38,68 L28,70 L26,40 Z"),
+    g.soft({ path: g.path("M24,0 C24,42 34,48 50,48 C66,48 76,42 76,0 Z"),
+             clip: head, color: shadowOf(skin[2], 0.35), alpha: 0.62, blur: 3.2 });
+    g.soft({ path: g.path("M31,40 C29,50 32,58 37,64 L28,66 L27,44 Z"),
              clip: head, color: shadowOf(skin[2], 0.3), alpha: 0.3, blur: 4 });
-    g.soft({ path: g.path("M70,34 C72,48 68,60 62,68 L72,70 L74,40 Z"),
+    g.soft({ path: g.path("M69,40 C71,50 68,58 63,64 L72,66 L73,44 Z"),
              clip: head, color: shadowOf(skin[2], 0.3), alpha: 0.3, blur: 4 });
-    g.soft({ path: g.path("M40,68 C44,74 56,74 60,68 C58,76 42,76 40,68 Z"),
+    g.soft({ path: g.path("M41,63 C45,68 55,68 59,63 C57,70 43,70 41,63 Z"),
              clip: head, color: shadowOf(skin[2], 0.35), alpha: 0.35, blur: 3 });
     // cheekbone light and a soft shadow under it — structure, not a smooth egg
     g.soft({ mode: "screen", clip: g.path(HEAD), color: lightOf(skin[0], 0.9), alpha: 0.4,
-             blur: 3.5, path: g.path("M36,54 m-5,0 a5,3.4 0 1,0 10,0 a5,3.4 0 1,0 -10,0") });
+             blur: 3.5, path: g.path("M37,57 m-5,0 a5,3.2 0 1,0 10,0 a5,3.2 0 1,0 -10,0") });
     g.soft({ mode: "screen", clip: g.path(HEAD), color: lightOf(skin[0], 0.9), alpha: 0.4,
-             blur: 3.5, path: g.path("M64,54 m-5,0 a5,3.4 0 1,0 10,0 a5,3.4 0 1,0 -10,0") });
+             blur: 3.5, path: g.path("M63,57 m-5,0 a5,3.2 0 1,0 10,0 a5,3.2 0 1,0 -10,0") });
     g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.3), alpha: 0.28, blur: 3,
-             path: g.path("M33,60 C36,66 42,70 46,72 L34,72 Z") });
+             path: g.path("M32,58 C34,63 39,67 43,68 L31,68 Z") });
     g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.3), alpha: 0.28, blur: 3,
-             path: g.path("M67,60 C64,66 58,70 54,72 L66,72 Z") });
+             path: g.path("M68,58 C66,63 61,67 57,68 L69,68 Z") });
     // light on the forehead, nose bridge and the tops of the cheeks
-    g.soft({ mode: "screen", path: g.path("M50,44 m-9,0 a9,13 0 1,0 18,0 a9,13 0 1,0 -18,0"),
+    g.soft({ mode: "screen", path: g.path("M50,50 m-8,0 a8,11 0 1,0 16,0 a8,11 0 1,0 -16,0"),
              clip: head, color: lightOf(skin[0], 0.8), alpha: 0.35, blur: 5 });
     g.ink(head, skinLine, 0.55);
 
@@ -356,7 +380,8 @@
 
     if (t.extra !== "none") accessory(g, t);
 
-    ctx.restore();
+    ctx.restore();  // head lift
+    ctx.restore();  // portrait transform
   }
 
   /* ---- pieces --------------------------------------------------------- */
@@ -379,57 +404,78 @@
   }
 
   function torso(g, ctx, t, skin, cloth, skinLine) {
-    var neck = g.path("M43,62 C43,72 42,76 40,80 L60,80 C58,76 57,72 57,62 Z");
-    var chest = g.path("M50,78 C32,78 16,88 11,112 L89,112 C84,88 68,78 50,78 Z");
-    g.fill(chest, mix(skin[1], skin[0], 0.4));
-    g.fill(neck, skin[1]);
-    // the chin throws a hard-ish shadow down the neck — a signature of the look
-    g.soft({ path: g.path("M40,60 C44,72 56,72 60,60 C60,74 40,74 40,60 Z"),
-             clip: neck, color: shadowOf(skin[2], 0.55), alpha: 0.75, blur: 2 });
-    g.soft({ path: g.path("M36,78 C44,84 56,84 64,78 C60,88 40,88 36,78 Z"),
-             clip: chest, color: shadowOf(skin[2], 0.4), alpha: 0.4, blur: 3 });
-    g.ink(neck, skinLine, 0.4);
-    g.ink(chest, skinLine, 0.4);
+    var base = skin[0], shade = skin[1], deep = skin[2];
+    var ink = mix(deep, "#8a5a63", 0.42);
 
+    // neck
+    var neck = g.path("M45,46 C45,60 44,66 42.5,72 L57.5,72 C56,66 55,60 55,46 Z");
+    g.fill(neck, shade);
+    g.soft({ path: g.path("M41,50 C45,60 55,60 59,50 C59,64 41,64 41,50 Z"),
+             clip: neck, color: shadowOf(deep, 0.55), alpha: 0.7, blur: 2 });
+    g.ink(neck, ink, 0.4);
+
+    // shoulders and upper arms — bare, which is what the off-shoulder top is for
+    var body = g.path("M50,68 C34,68 22,74 16,84 C10,94 7,106 6,118 L94,118 " +
+                      "C93,106 90,94 84,84 C78,74 66,68 50,68 Z");
+    var bodyGrad = ctx.createLinearGradient(0, 68, 0, 118);
+    bodyGrad.addColorStop(0, mix(base, shade, 0.3));
+    bodyGrad.addColorStop(1, shade);
+    g.fill(body, bodyGrad);
+    // the neck's shadow on the chest, and shading where the arms turn away
+    g.soft({ path: g.path("M36,68 C43,76 57,76 64,68 C60,82 40,82 36,68 Z"),
+             clip: body, color: shadowOf(deep, 0.4), alpha: 0.4, blur: 3.5 });
+    g.soft({ path: g.path("M6,118 C7,104 12,92 20,84 L10,84 L2,118 Z"),
+             clip: body, color: shadowOf(deep, 0.35), alpha: 0.35, blur: 3 });
+    g.soft({ path: g.path("M94,118 C93,104 88,92 80,84 L90,84 L98,118 Z"),
+             clip: body, color: shadowOf(deep, 0.35), alpha: 0.35, blur: 3 });
     // collarbones
-    g.stroke(g.path("M40,88 C44,91 47,92 49,91.5"), shadowOf(skin[2], 0.35), 0.7,
-             { clip: chest, blur: 0.5, alpha: 0.5 });
-    g.stroke(g.path("M60,88 C56,91 53,92 51,91.5"), shadowOf(skin[2], 0.35), 0.7,
-             { clip: chest, blur: 0.5, alpha: 0.5 });
+    g.stroke(g.path("M40,78 C44,81.5 47,82.5 49,82"), shadowOf(deep, 0.35), 0.7,
+             { clip: body, blur: 0.5, alpha: 0.45 });
+    g.stroke(g.path("M60,78 C56,81.5 53,82.5 51,82"), shadowOf(deep, 0.35), 0.7,
+             { clip: body, blur: 0.5, alpha: 0.45 });
+    g.ink(body, ink, 0.4);
 
-    // off-shoulder top
-    var top = g.path("M8,112 C6,96 12,86 21,84 C29,82.5 33,89 39,91 " +
-                     "C43,92.5 46,93 50,93 C54,93 57,92.5 61,91 " +
-                     "C67,89 71,82.5 79,84 C88,86 94,96 92,112 Z");
-    var cg = ctx.createLinearGradient(0, 82, 0, 112);
+    // off-shoulder top: sleeves sit low on the arms, neckline scoops wide
+    var top = g.path("M50,90 C40,90 32,87 26,83 C19,86 13,96 11,118 L89,118 " +
+                     "C87,96 81,86 74,83 C68,87 60,90 50,90 Z");
+    var cg = ctx.createLinearGradient(0, 82, 0, 118);
     cg.addColorStop(0, cloth[0]);
-    cg.addColorStop(0.5, cloth[1]);
-    cg.addColorStop(1, mix(cloth[1], cloth[2], 0.6));
+    cg.addColorStop(0.45, cloth[1]);
+    cg.addColorStop(1, mix(cloth[1], cloth[2], 0.55));
     g.fill(top, cg);
-    g.soft({ path: g.path("M50,93 C40,93 33,88 26,84 L20,112 L80,112 L74,84 C67,88 60,93 50,93 Z"),
-             clip: top, color: shadowOf(cloth[2], 0.4), alpha: 0.2, blur: 4 });
-    // fold shadows where the sleeves meet the bodice
-    g.stroke(g.path("M27,86 C25,94 25,104 26,112"), shadowOf(cloth[2], 0.4), 1.2,
-             { clip: top, blur: 1, alpha: 0.35 });
-    g.stroke(g.path("M73,86 C75,94 75,104 74,112"), shadowOf(cloth[2], 0.4), 1.2,
-             { clip: top, blur: 1, alpha: 0.35 });
-    g.ink(top, mix(cloth[2], "#7a5560", 0.35), 0.45);
-    // neckline strap highlight
-    g.stroke(g.path("M39,91 C43,92.5 46,93 50,93 C54,93 57,92.5 61,91"),
-             lightOf(cloth[0], 0.7), 0.6, { alpha: 0.7 });
+    // folds
+    g.stroke(g.path("M27,88 C25,98 25,108 26,118"), shadowOf(cloth[2], 0.4), 1.4,
+             { clip: top, blur: 1.2, alpha: 0.3 });
+    g.stroke(g.path("M73,88 C75,98 75,108 74,118"), shadowOf(cloth[2], 0.4), 1.4,
+             { clip: top, blur: 1.2, alpha: 0.3 });
+    g.soft({ path: g.path("M50,90 C40,90 32,87 26,83 L21,118 L79,118 L74,83 " +
+                          "C68,87 60,90 50,90 Z"),
+             clip: top, color: shadowOf(cloth[2], 0.35), alpha: 0.18, blur: 4 });
+    g.ink(top, mix(cloth[2], "#7a5560", 0.35), 0.42);
+    // the heart motif on the chest
+    g.stroke(g.path("M50,104 C46,98 38,98 38,104 C38,110 45,113 50,115"),
+             lightOf(cloth[0], 0.85), 1.6, { clip: top, alpha: 0.75 });
+    g.stroke(g.path("M50,104 C54,98 62,98 62,104 C62,110 55,113 50,115"),
+             lightOf(cloth[0], 0.85), 1.6, { clip: top, alpha: 0.75 });
+
+    // thin straps over the bare shoulders
+    ["M36,89 C33,84 30,80 27,77", "M64,89 C67,84 70,80 73,77"].forEach(function (d) {
+      g.stroke(g.path(d), "#fffaf2", 1.5, { alpha: 0.9 });
+      g.stroke(g.path(d), mix(cloth[2], "#7a5560", 0.3), 1.9, { alpha: 0.25, blur: 0.6 });
+    });
 
     choker(g, t);
   }
 
   function choker(g, t) {
-    var band = g.path("M41,74 C44,77 56,77 59,74 L59,78.5 C56,81.5 44,81.5 41,78.5 Z");
+    var band = g.path("M43,60 C46,62.6 54,62.6 57,60 L57,64.5 C54,67.2 46,67.2 43,64.5 Z");
     g.fill(band, "#f2607d");
     g.soft({ path: band, color: "#8c3550", alpha: 0.5, blur: 1.2, shift: [0, 1.2] });
-    g.stroke(g.path("M41.6,75 C44.6,77.6 55.4,77.6 58.4,75"), "#ffb3c4", 0.6, { alpha: 0.8 });
+    g.stroke(g.path("M43.6,61 C46.4,63.3 53.6,63.3 56.4,61"), "#ffb3c4", 0.6, { alpha: 0.8 });
     g.ink(band, "#a8425c", 0.4);
     // heart pendant
-    var heart = g.path("M50,84 C48.6,81.4 45.2,81.6 45.2,84.4 C45.2,86.8 48,88.4 50,90.2 " +
-                       "C52,88.4 54.8,86.8 54.8,84.4 C54.8,81.6 51.4,81.4 50,84 Z");
+    var heart = g.path("M50,70 C48.6,67.4 45.4,67.6 45.4,70.4 C45.4,72.8 48,74.4 50,76.2 " +
+                       "C52,74.4 54.6,72.8 54.6,70.4 C54.6,67.6 51.4,67.4 50,70 Z");
     g.fill(heart, "#f0c34a");
     g.soft({ mode: "screen", path: heart, color: "#fff3c4", alpha: 0.8, blur: 0.8,
              shift: [-0.5, -0.6] });
@@ -439,20 +485,21 @@
   function ears(g, ctx, t, hair, hairLine, skin) {
     var L, R, LI, RI;
     if (t.ears === "round") {
-      L = "M33,28 C25,25 24,12 32,9 C40,7 44,16 43,24 Z";
-      R = "M67,28 C75,25 76,12 68,9 C60,7 56,16 57,24 Z";
-      LI = "M34,25 C29,22 29,14 33,13 C38,13 40,19 39,23 Z";
-      RI = "M66,25 C71,22 71,14 67,13 C62,13 60,19 61,23 Z";
+      L = "M35,28 C28,25 27,14 34,12 C41,10 44,17 43,24 Z";
+      R = "M65,28 C72,25 73,14 66,12 C59,10 56,17 57,24 Z";
+      LI = "M36,25 C32,23 32,16 35,15 C39,15 41,20 40,23 Z";
+      RI = "M64,25 C68,23 68,16 65,15 C61,15 59,20 60,23 Z";
     } else if (t.ears === "folded") {
-      L = "M33,29 C25,20 28,9 37,10 C44,12 46,19 45,25 C41,20 36,22 33,29 Z";
-      R = "M67,29 C75,20 72,9 63,10 C56,12 54,19 55,25 C59,20 64,22 67,29 Z";
-      LI = "M35,24 C31,18 33,14 38,15 C42,16 43,20 42,23 Z";
-      RI = "M65,24 C69,18 67,14 62,15 C58,16 57,20 58,23 Z";
+      L = "M35,28 C29,21 31,12 38,13 C44,14 46,20 45,25 C42,21 37,22 35,28 Z";
+      R = "M65,28 C71,21 69,12 62,13 C56,14 54,20 55,25 C58,21 63,22 65,28 Z";
+      LI = "M37,24 C33,19 35,15 39,16 C42,17 43,21 42,23 Z";
+      RI = "M63,24 C67,19 65,15 61,16 C58,17 57,21 58,23 Z";
     } else {
-      L = "M33,29 C27,22 25,10 27,6 C34,9 43,17 45,26 Z";
-      R = "M67,29 C73,22 75,10 73,6 C66,9 57,17 55,26 Z";
-      LI = "M35,25 C31,20 30,13 31,11 C36,14 41,19 42,24 Z";
-      RI = "M65,25 C69,20 70,13 69,11 C64,14 59,19 58,24 Z";
+      // pointy: a tall triangle with a soft outer curve, like the reference
+      L = "M34,30 C27,22 24,10 26,4 C34,8 44,17 47,27 Z";
+      R = "M66,30 C73,22 76,10 74,4 C66,8 56,17 53,27 Z";
+      LI = "M36,26 C31,20 30,13 31,9 C37,13 42,19 44,25 Z";
+      RI = "M64,26 C69,20 70,13 69,9 C63,13 58,19 56,25 Z";
     }
     [[L, LI], [R, RI]].forEach(function (pair) {
       var outer = g.path(pair[0]), inner = g.path(pair[1]);
@@ -460,9 +507,10 @@
       eg.addColorStop(0, hair[1]);
       eg.addColorStop(1, hair[0]);
       g.fill(outer, eg);
-      // the fluff: a light blurred core, not a flat pink triangle
-      g.fill(inner, mix(skin[1], "#ffb9c6", 0.35));
-      g.soft({ mode: "screen", path: inner, color: "#fff4ea", alpha: 0.75, blur: 1.6 });
+      // the fluff: white, tufted, sitting proud of the ear
+      g.fill(inner, mix(skin[1], "#ffc9d2", 0.3));
+      g.soft({ path: inner, color: "#fffdfa", alpha: 0.9, blur: 1.1 });
+      g.soft({ mode: "screen", path: inner, color: "#ffffff", alpha: 0.8, blur: 2.2 });
       g.soft({ path: outer, color: shadowOf(hair[2], 0.4), alpha: 0.3, blur: 2.5,
                shift: [0, 3], clip: outer });
       g.ink(outer, hairLine, 0.55);
@@ -471,11 +519,11 @@
 
   function blush(g, head, skin) {
     [32.5, 67.5].forEach(function (x) {
-      var p = g.path("M" + x + "," + BLUSH_Y + " m-7,0 a7,4.4 0 1,0 14,0 a7,4.4 0 1,0 -14,0");
+      var p = g.path("M" + x + "," + BLUSH_Y + " m-6.5,0 a6.5,3.8 0 1,0 13,0 a6.5,3.8 0 1,0 -13,0");
       g.soft({ path: p, clip: head, color: "#f2758f", alpha: 0.34, blur: 3.4 });
     });
     // a hint of warmth across the nose, which ties the two cheeks together
-    g.soft({ path: g.path("M50,54 m-8,0 a8,3 0 1,0 16,0 a8,3 0 1,0 -16,0"),
+    g.soft({ path: g.path("M50,58 m-7,0 a7,2.6 0 1,0 14,0 a7,2.6 0 1,0 -14,0"),
              clip: head, color: "#f2758f", alpha: 0.14, blur: 4 });
   }
 
@@ -486,7 +534,7 @@
     c.fillStyle = shadowOf(skin[2], 0.4);
     for (var i = 0; i < 14; i++) {
       var side = i % 2 ? 1 : -1;
-      var x = 50 + side * (5 + r() * 9), y = 53 + r() * 6;
+      var x = 50 + side * (5 + r() * 8), y = 57 + r() * 4.5;
       c.beginPath(); c.arc(x, y, 0.3 + r() * 0.28, 0, 6.284); c.fill();
     }
     c.restore();
@@ -529,19 +577,21 @@
     var rx = EYE.rx;
     // The iris nearly fills the opening. Leaving a lot of white was what made
     // earlier passes look like a doll rather than a drawing.
-    var ir = ry * 1.16, iy = y + ry * 0.06;
+    // The iris fills about 80% of the opening's height and 75% of its width,
+    // which leaves white at the corners but not the fried-egg ring I had.
+    var iv = ry * 1.02, ih = ry * 0.86, iy = y + ry * 0.08;
 
     g.fill(shell, "#fffaf4");
     c.save();
     c.clip(shell);
 
     // iris: dark at the top where the lid shades it, bright at the bottom
-    var ig = ctx.createLinearGradient(0, iy - ir, 0, iy + ir);
+    var ig = ctx.createLinearGradient(0, iy - iv, 0, iy + iv);
     ig.addColorStop(0, col[2]);
     ig.addColorStop(0.45, col[1]);
     ig.addColorStop(1, col[0]);
     c.fillStyle = ig;
-    c.beginPath(); c.ellipse(cx, iy, ir * 0.94, ir, 0, 0, 6.284); c.fill();
+    c.beginPath(); c.ellipse(cx, iy, ih, iv, 0, 0, 6.284); c.fill();
 
     // spokes and a soft inner glow low in the iris
     c.save();
@@ -551,35 +601,36 @@
     for (var i = 0; i < 12; i++) {
       var a = (i / 12) * 6.284;
       c.beginPath();
-      c.moveTo(cx + Math.cos(a) * ir * 0.34, iy + Math.sin(a) * ir * 0.36);
-      c.lineTo(cx + Math.cos(a) * ir * 0.86, iy + Math.sin(a) * ir * 0.92);
+      c.moveTo(cx + Math.cos(a) * ih * 0.34, iy + Math.sin(a) * iv * 0.36);
+      c.lineTo(cx + Math.cos(a) * ih * 0.88, iy + Math.sin(a) * iv * 0.92);
       c.stroke();
     }
     c.restore();
-    g.soft({ mode: "screen", color: col[0], alpha: 0.85, blur: 1.4,
-             path: g.path("M" + cx + "," + (iy + ir * 0.5) + " m-" + (ir * 0.58) + ",0 a" +
-               (ir * 0.58) + "," + (ir * 0.36) + " 0 1,0 " + (ir * 1.16) + ",0 a" +
-               (ir * 0.58) + "," + (ir * 0.36) + " 0 1,0 -" + (ir * 1.16) + ",0") });
+    g.soft({ mode: "screen", color: col[0], alpha: 0.9, blur: 1.2,
+             path: g.path("M" + cx + "," + (iy + iv * 0.5) + " m-" + (ih * 0.6) + ",0 a" +
+               (ih * 0.6) + "," + (iv * 0.34) + " 0 1,0 " + (ih * 1.2) + ",0 a" +
+               (ih * 0.6) + "," + (iv * 0.34) + " 0 1,0 -" + (ih * 1.2) + ",0") });
 
     c.save();
     c.globalAlpha = 0.7;
     c.strokeStyle = col[2];
     c.lineWidth = 0.85;
-    c.beginPath(); c.ellipse(cx, iy, ir * 0.94, ir, 0, 0, 6.284); c.stroke();
+    c.beginPath(); c.ellipse(cx, iy, ih, iv, 0, 0, 6.284); c.stroke();
     c.restore();
 
     c.fillStyle = mix(col[2], "#241624", 0.7);
-    c.beginPath(); c.ellipse(cx, iy + ir * 0.05, ir * 0.3, ir * 0.42, 0, 0, 6.284); c.fill();
+    c.beginPath(); c.ellipse(cx, iy + iv * 0.04, ih * 0.34, iv * 0.46, 0, 0, 6.284); c.fill();
 
     // shadow cast into the eye by the upper lid
     g.soft({ color: shadowOf(col[2], 0.65), alpha: 0.55, blur: 2, shift: [0, -2.2],
              path: shell });
     c.restore();
 
-    var h1 = g.path("M" + (cx - o * 2.2) + "," + (y - ry * 0.5) +
-                    " m-2.8,0 a2.8,2.3 0 1,0 5.6,0 a2.8,2.3 0 1,0 -5.6,0");
-    var h2 = g.path("M" + (cx + o * 2.6) + "," + (y + ry * 0.66) +
-                    " m-1.3,0 a1.3,1.3 0 1,0 2.6,0 a1.3,1.3 0 1,0 -2.6,0");
+    // One light source: both catchlights sit upper-left, not mirrored inward.
+    var h1 = g.path("M" + (cx - 2) + "," + (y - ry * 0.52) +
+                    " m-2.1,0 a2.1,1.8 0 1,0 4.2,0 a2.1,1.8 0 1,0 -4.2,0");
+    var h2 = g.path("M" + (cx + 2.3) + "," + (y + ry * 0.55) +
+                    " m-1,0 a1,1 0 1,0 2,0 a1,1 0 1,0 -2,0");
     g.soft({ path: h1, color: "#fff", alpha: 1, mode: "source-over" });
     g.soft({ path: h2, color: "#fff", alpha: 0.95, mode: "source-over" });
     g.soft({ path: h1, color: "#fff", alpha: 0.45, mode: "screen", blur: 2 });
@@ -640,19 +691,19 @@
     var my = MOUTH_Y;
     var lip = mix(skinLine, "#c4566f", 0.5);
     if (t.mouth === "open") {
-      var m = g.path("M46.4," + my + " C47.8," + (my + 4.6) + " 52.2," + (my + 4.6) +
-                     " 53.6," + my + " C51.2," + (my + 1.3) + " 48.8," + (my + 1.3) +
-                     " 46.4," + my + " Z");
+      var m = g.path("M47.4," + my + " C48.4," + (my + 3.4) + " 51.6," + (my + 3.4) +
+                     " 52.6," + my + " C51," + (my + 1) + " 49," + (my + 1) +
+                     " 47.4," + my + " Z");
       g.fill(m, "#a03c58");
       g.soft({ path: m, color: "#5e2036", alpha: 0.6, blur: 0.8, shift: [0, -0.6] });
-      var tongue = g.path("M48.2," + (my + 2.6) + " C49," + (my + 4.6) + " 51," + (my + 4.6) +
-                          " 51.8," + (my + 2.6) + " C50.6," + (my + 2) + " 49.4," + (my + 2) +
-                          " 48.2," + (my + 2.6) + " Z");
+      var tongue = g.path("M48.6," + (my + 1.9) + " C49.2," + (my + 3.4) + " 50.8," + (my + 3.4) +
+                          " 51.4," + (my + 1.9) + " C50.5," + (my + 1.5) + " 49.5," + (my + 1.5) +
+                          " 48.6," + (my + 1.9) + " Z");
       g.fill(tongue, "#f2839f");
       g.ink(m, lip, 0.35);
       // a bright edge on the lower lip
-      g.stroke(g.path("M47.6," + (my + 3.8) + " C49," + (my + 5.2) + " 51," + (my + 5.2) +
-               " 52.4," + (my + 3.8)), "#ffd9dd", 0.5, { alpha: 0.55, blur: 0.4, mode: "screen" });
+      g.stroke(g.path("M48.2," + (my + 2.9) + " C49.2," + (my + 3.9) + " 50.8," + (my + 3.9) +
+               " 51.8," + (my + 2.9)), "#ffd9dd", 0.45, { alpha: 0.55, blur: 0.4, mode: "screen" });
     } else if (t.mouth === "cat") {
       g.stroke(g.path("M46.6," + my + " C47.8," + (my + 2.2) + " 49," + (my + 2.2) +
                " 50," + my + " C51," + (my + 2.2) + " 52.2," + (my + 2.2) + " 53.4," + my),
@@ -672,63 +723,84 @@
     var tips = bangTips(t);
 
     // base cap under the strands, slightly deeper so the strands read on top
-    var cap = "M20,46 C20,18 34,8 50,8 C66,8 80,18 80,46";
+    var cap = "M14,52 C14,14 32,2 50,2 C68,2 86,14 86,52";
     tips.forEach(function (p) {
       cap += " C" + (p[0] + 5) + "," + (p[1] - 7) +
              " " + (p[0] + 2) + "," + (p[1] - 1) + " " + p[0] + "," + p[1];
     });
-    cap += " L20,46 Z";
+    cap += " L14,52 Z";
     var capPath = g.path(cap);
-    var capGrad = ctx.createLinearGradient(0, 8, 0, 48);
-    capGrad.addColorStop(0, hair[1]);
-    capGrad.addColorStop(1, mix(hair[2], hair[1], 0.35));
+    var capGrad = ctx.createLinearGradient(0, 2, 0, 54);
+    capGrad.addColorStop(0, hair[0]);
+    capGrad.addColorStop(0.5, hair[1]);
+    capGrad.addColorStop(1, mix(hair[1], hair[2], 0.5));
     g.fill(capPath, capGrad);
 
     // face-framing locks
-    ["M26,30 C18,44 15,64 19,84 C22,72 24,60 30,52 C27,44 26,37 30,31 Z",
-     "M74,30 C82,44 85,64 81,84 C78,72 76,60 70,52 C73,44 74,37 70,31 Z"].forEach(function (d) {
+    ["M30,12 C18,30 13,58 15,96 C19,78 23,62 32,52 C28,40 27,24 34,13 Z",
+     "M70,12 C82,30 87,58 85,96 C81,78 77,62 68,52 C72,40 73,24 66,13 Z"].forEach(function (d) {
       var p = g.path(d);
-      var lg = ctx.createLinearGradient(0, 28, 0, 80);
+      var lg = ctx.createLinearGradient(0, 14, 0, 88);
       lg.addColorStop(0, hair[0]);
       lg.addColorStop(1, hair[2]);
       g.fill(p, lg);
       g.ink(p, hairLine, 0.5);
     });
 
-    // the strands themselves
+    // Clip the strands to the fringe outline, so no strand's straight top edge
+    // can show as a rectangle at the temples.
+    g.c.save();
+    g.c.clip(capPath);
     tips.forEach(function (p, i) {
-      var w = 5.6 + (i % 3) * 1.6 + r() * 1.2;
-      var cx = 50 + (p[0] - 50) * 0.4;
-      var d = "M" + (cx - w) + ",16" +
-        " C" + (cx - w) + "," + (16 + p[1] * 0.4) +
+      var w = 6.5 + (i % 3) * 1.8 + r() * 1.4;
+      var cx = 50 + (p[0] - 50) * 0.75;
+      var d = "M" + (cx - w) + ",24" +
+        " C" + (cx - w) + "," + (24 + p[1] * 0.35) +
         " " + (p[0] - w * 0.72) + "," + (p[1] - 11) + " " + p[0] + "," + p[1] +
         " C" + (p[0] + w * 0.72) + "," + (p[1] - 11) +
-        " " + (cx + w) + "," + (16 + p[1] * 0.4) + " " + (cx + w) + ",16 Z";
+        " " + (cx + w) + "," + (24 + p[1] * 0.35) + " " + (cx + w) + ",24 Z";
       var path = g.path(d);
       // each strand drops a soft shadow on the one behind it
-      g.soft({ path: path, color: shadowOf(hair[2], 0.45), alpha: 0.45, blur: 1.6,
-               shift: [1.4, 1.6] });
-      var sg = ctx.createLinearGradient(0, 14, 0, p[1] + 4);
+      g.soft({ path: path, color: shadowOf(hair[2], 0.45), alpha: 0.4, blur: 1.8,
+               shift: [1.8, 1.6] });
+      var sg = ctx.createLinearGradient(0, 22, 0, p[1] + 4);
       sg.addColorStop(0, lightOf(hair[0], i % 2 ? 0.25 : 0));
       sg.addColorStop(0.55, hair[1]);
       sg.addColorStop(1, mix(hair[1], hair[2], 0.75));
       g.fill(path, sg);
-      g.ink(path, hairLine, 0.42);
+      g.stroke(path, hairLine, 0.3, { alpha: 0.28 });
     });
+    g.c.restore();
 
     // the sheen band: blurred, screened, with a broken lower edge
-    var sheen = g.path("M26,22 C34,12 66,12 74,22 C72,30 67,25 62,29 " +
-                       "C57,33 53,25 50,29 C47,33 43,25 38,29 C33,33 28,30 26,22 Z");
-    g.soft({ mode: "screen", path: sheen, color: lightOf(hair[0], 0.85), alpha: 0.65, blur: 2.4 });
+    var sheen = g.path("M28,26 C36,16 64,16 72,26 C70,32 66,28 62,31 " +
+                       "C58,34 54,29 50,31 C46,34 42,29 38,31 C34,34 30,31 28,26 Z");
+    g.soft({ mode: "screen", path: sheen, color: lightOf(hair[0], 0.8), alpha: 0.28, blur: 4 });
 
     // rim light along the top of the silhouette
     g.stroke(g.path("M20,40 C20,12 34,2 50,2 C66,2 80,12 80,40"),
              lightOf(hair[0], 0.9), 1.4, { mode: "screen", alpha: 0.5, blur: 1.4 });
 
-    // flyaways
-    g.stroke(g.path("M30,10 C24,17 21,26 21,34"), hairLine, 0.4, { alpha: 0.5 });
-    g.stroke(g.path("M70,10 C76,17 79,26 79,34"), hairLine, 0.4, { alpha: 0.5 });
-    g.stroke(g.path("M44,4 C40,10 38,17 38,23"), hairLine, 0.35, { alpha: 0.4 });
+    // wispy tips hanging past the fringe, and a couple of flyaways
+    tips.forEach(function (p, i) {
+      if (i % 2) return;
+      g.stroke(g.path("M" + (p[0] - 1) + "," + (p[1] - 8) +
+        " C" + (p[0] - 1.5) + "," + (p[1] - 2) + " " + (p[0] - 1) + "," + (p[1] + 1) +
+        " " + (p[0] - 2.5) + "," + (p[1] + 4.5)), hairLine, 0.5,
+        { alpha: 0.45, blur: 0.2 });
+    });
+    [["M38,20 C35,32 34,42 35,52 C37,42 39,32 41,22 Z", 1],
+     ["M62,20 C65,32 66,42 65,52 C63,42 61,32 59,22 Z", -1]].forEach(function (e) {
+      var p = g.path(e[0]);
+      g.soft({ path: p, color: shadowOf(hair[2], 0.4), alpha: 0.22, blur: 1.8,
+               shift: [e[1] * 1.2, 1.2] });
+      // hair[0] is the highlight tone — filling a whole strand with it drew a
+      // white bar down the face on light hair
+      g.fill(p, hair[1]);
+      g.stroke(p, hairLine, 0.28, { alpha: 0.2 });
+    });
+    g.stroke(g.path("M30,12 C24,19 22,27 22,34"), hairLine, 0.4, { alpha: 0.4 });
+    g.stroke(g.path("M70,12 C76,19 78,27 78,34"), hairLine, 0.4, { alpha: 0.4 });
   }
 
   function accessory(g, t) {
