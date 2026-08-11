@@ -129,6 +129,7 @@
   var EXTRAS = ["none", "none", "clip", "flower", "ribbon"];
 
   function pick(r, a) { return a[Math.floor(r() * a.length)]; }
+  function n(v) { return Math.round(v * 100) / 100; }
 
   function traits(seed) {
     var r = rng(hash(String(seed)));
@@ -178,10 +179,11 @@
                "C50,86 46,79 46,79 C42,86 36,84 32,77 " +
                "C29,84 23,86 19,80 C16,72 14,62 14,48 C14,26 28,10 50,10 Z";
       case "hime":
-        return "M50,9 C74,9 88,25 88,48 C88,72 93,94 95,118 L74,118 " +
+        return "M50,9 C74,9 88,25 88,46 C84,56 86,66 91,76 " +
+               "C88,90 92,104 95,118 L74,118 " +
                "C77,96 79,76 78,58 C74,80 72,98 71,118 L29,118 " +
                "C28,98 26,80 22,58 C21,76 23,96 26,118 L5,118 " +
-               "C7,94 12,72 12,48 C12,25 26,9 50,9 Z";
+               "C8,104 12,90 9,76 C14,66 16,56 12,46 C12,25 26,9 50,9 Z";
       case "twintails":
         return "M50,10 C72,10 86,26 86,48 L86,66 C68,74 32,74 14,66 L14,48 " +
                "C14,26 28,10 50,10 Z" +
@@ -200,11 +202,14 @@
                "M15,27 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z" +
                "M85,27 m-12,0 a12,12 0 1,0 24,0 a12,12 0 1,0 -24,0 Z";
       default: // long
-        return "M50,9 C75,9 89,27 90,48 C91,64 96,80 97,96 " +
-               "C98,106 94,114 90,118 L74,118 " +
-               "C80,100 82,82 79,64 C76,84 72,102 70,118 L30,118 " +
-               "C28,102 24,84 21,64 C18,82 20,100 26,118 L10,118 " +
-               "C6,114 2,106 3,96 C4,80 9,64 10,48 C11,27 25,9 50,9 Z";
+        // The outer edge waves: in and out at cheek and shoulder height, then
+        // splits into lock tips at the hem.
+        return "M50,9 C75,9 89,27 90,45 C87,58 90,66 94,78 " +
+               "C91,88 94,102 97,118 L76,118 " +
+               "C82,102 83,84 80,66 C77,86 73,102 71,118 L29,118 " +
+               "C27,102 23,86 20,66 C17,84 18,102 24,118 L9,118 " +
+               "C11,100 8,86 11,74 C15,62 12,54 10,45 " +
+               "C10,27 25,9 50,9 Z";
     }
   }
 
@@ -212,12 +217,12 @@
   function bangTips(t) {
     switch (t.hair) {
       // Staggered lengths: an even row of tips draws a straight hem.
-      case "hime":  return [[69, 47], [62, 52], [55, 48], [46, 53], [39, 48], [31, 51]];
-      case "bob":   return [[68, 45], [61, 51], [54, 46], [46, 52], [39, 47], [32, 50]];
-      case "buns":  return [[67, 44], [58, 50], [50, 45], [42, 51], [33, 46]];
-      case "ponytail": return [[66, 43], [57, 50], [49, 45], [41, 51], [33, 46]];
-      case "twintails": return [[68, 45], [61, 51], [54, 46], [46, 52], [39, 47], [32, 50]];
-      default:      return [[69, 46], [62, 53], [55, 47], [46, 54], [39, 48], [31, 51]];
+      case "hime":  return [[69, 45], [62, 49], [55, 45], [46, 50], [39, 45], [31, 48]];
+      case "bob":   return [[68, 43], [61, 48], [54, 44], [46, 49], [39, 44], [32, 47]];
+      case "buns":  return [[67, 42], [58, 47], [50, 43], [42, 48], [33, 44]];
+      case "ponytail": return [[66, 41], [57, 47], [49, 43], [41, 48], [33, 44]];
+      case "twintails": return [[68, 43], [61, 48], [54, 44], [46, 49], [39, 44], [32, 47]];
+      default:      return [[69, 44], [62, 50], [55, 45], [46, 51], [39, 45], [31, 48]];
     }
   }
 
@@ -275,6 +280,42 @@
     this.stroke(p, color, w, { alpha: 1 });
   };
 
+  // Finer strand lines inside the fringe itself, fanning from the parting.
+  function fringeStrands(g, clipPath, hair, r) {
+    var deep = shadowOf(hair[2], 0.4), lit = lightOf(hair[0], 0.7);
+    for (var i = 0; i < 12; i++) {
+      var x0 = 50 + (r() * 2 - 1) * 10;
+      var x1 = 50 + (r() * 2 - 1) * 34;
+      var d = "M" + n(x0) + ",6 C" + n(x0 + (x1 - x0) * 0.5) + ",22 " +
+              n(x1) + ",32 " + n(x1) + "," + n(46 + r() * 10);
+      var p = g.path(d);
+      g.stroke(p, deep, 1 + r() * 1.4, { clip: clipPath, blur: 1, alpha: 0.16 });
+      g.stroke(p, lit, 0.6, { clip: clipPath, blur: 0.7, alpha: 0.2, mode: "screen" });
+    }
+  }
+
+  // Long strands running from the crown down through the mass. Without these
+  // the back hair is a single flat gradient — the thing that most made it read
+  // as a moulded shape rather than hair.
+  function hairStrands(g, clipPath, hair, r) {
+    var deep = shadowOf(hair[2], 0.45), lit = lightOf(hair[0], 0.7);
+    for (var i = 0; i < 18; i++) {
+      var side = i % 2 ? 1 : -1;
+      var t = r();
+      // start near the crown, end out at the hem, bowing outward on the way
+      var x0 = 50 + side * (4 + t * 26);
+      var x1 = 50 + side * (18 + t * 26 + r() * 8);
+      var bow = 50 + side * (16 + t * 30);
+      var y1 = 70 + r() * 48;
+      var d = "M" + n(x0) + ",10 C" + n(bow) + "," + n(30 + r() * 14) +
+              " " + n(x1) + "," + n(48 + r() * 16) + " " + n(x1) + "," + n(y1);
+      var p = g.path(d);
+      g.stroke(p, deep, 1.8 + r() * 2.6, { clip: clipPath, blur: 1.5, alpha: 0.22 });
+      g.stroke(p, lit, 0.9 + r() * 1.2, { clip: clipPath, blur: 0.9, alpha: 0.26,
+                                          mode: "screen" });
+    }
+  }
+
   /* ================= the portrait ====================================== */
 
   function paintPortrait(ctx, t, S) {
@@ -323,6 +364,7 @@
     g.soft({ path: g.path("M50,4 C22,4 8,30 6,70 L2,70 L2,0 L98,0 L98,70 L94,70 " +
                           "C92,30 78,4 50,4 Z"),
              clip: back, color: shadowOf(hair[2], 0.5), alpha: 0.3, blur: 6 });
+    hairStrands(g, back, hair, rng(t.strandSeed ^ 0x5bf03635));
     g.ink(back, hairLine, 0.62);
     ctx.restore();
 
@@ -360,6 +402,29 @@
              path: g.path("M32,58 C34,63 39,67 43,68 L31,68 Z") });
     g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.3), alpha: 0.28, blur: 3,
              path: g.path("M68,58 C66,63 61,67 57,68 L69,68 Z") });
+    // sockets around the eyes and a shadow beside the nose — without these the
+    // face is a flat wash however soft the rest of the shading is
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.3, blur: 2.6,
+             path: g.path("M" + (EYE.l - 8) + "," + (EYE.y - 5) +
+                          " C" + (EYE.l - 4) + "," + (EYE.y - 9) + " " + (EYE.l + 5) + "," +
+                          (EYE.y - 9) + " " + (EYE.l + 8) + "," + (EYE.y - 4) +
+                          " C" + EYE.l + "," + (EYE.y - 6) + " " + (EYE.l - 5) + "," +
+                          (EYE.y - 5) + " " + (EYE.l - 8) + "," + (EYE.y - 5) + " Z") });
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.3, blur: 2.6,
+             path: g.path("M" + (EYE.r + 8) + "," + (EYE.y - 5) +
+                          " C" + (EYE.r + 4) + "," + (EYE.y - 9) + " " + (EYE.r - 5) + "," +
+                          (EYE.y - 9) + " " + (EYE.r - 8) + "," + (EYE.y - 4) +
+                          " C" + EYE.r + "," + (EYE.y - 6) + " " + (EYE.r + 5) + "," +
+                          (EYE.y - 5) + " " + (EYE.r + 8) + "," + (EYE.y - 5) + " Z") });
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.4), alpha: 0.22, blur: 1.8,
+             path: g.path("M52," + (NOSE_Y - 5) + " C54," + (NOSE_Y - 2) + " 54," +
+                          NOSE_Y + " 52.4," + (NOSE_Y + 0.6) + " C51," + (NOSE_Y - 2) +
+                          " 51," + (NOSE_Y - 4) + " 52," + (NOSE_Y - 5) + " Z") });
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.22, blur: 2,
+             path: g.path("M46," + (MOUTH_Y + 3.4) + " C48," + (MOUTH_Y + 5) + " 52," +
+                          (MOUTH_Y + 5) + " 54," + (MOUTH_Y + 3.4) + " C52," +
+                          (MOUTH_Y + 6.4) + " 48," + (MOUTH_Y + 6.4) + " 46," +
+                          (MOUTH_Y + 3.4) + " Z") });
     // light on the forehead, nose bridge and the tops of the cheeks
     g.soft({ mode: "screen", path: g.path("M50,50 m-8,0 a8,11 0 1,0 16,0 a8,11 0 1,0 -16,0"),
              clip: head, color: lightOf(skin[0], 0.8), alpha: 0.35, blur: 5 });
@@ -546,7 +611,6 @@
     var o = cx < 50 ? -1 : 1;
     var rx = EYE.rx, ry = EYE.ry * (shape === "sleepy" ? 0.82 : shape === "wide" ? 1.08 : 1);
     var y = EYE.y + drop;
-    var n = function (v) { return Math.round(v * 100) / 100; };
     return "M" + n(cx - o * rx) + "," + n(y + ry * 0.42) +
       " C" + n(cx - o * rx * 0.78) + "," + n(y - ry * 0.85) +
         " " + n(cx + o * rx * 0.1) + "," + n(y - ry * 1.28) +
@@ -676,8 +740,8 @@
               " C" + (cx - o * 2.6) + "," + (BROW_Y - 1.2) +
               " " + (cx + o * 2.8) + "," + (BROW_Y - 0.9) +
               " " + (cx + o * 5.2) + "," + (BROW_Y + 0.7);
-      g.stroke(g.path(d), col, 1.1, { alpha: 0.35, blur: 0.8 });
-      g.stroke(g.path(d), col, 0.62, { alpha: 0.75 });
+      g.stroke(g.path(d), col, 1.2, { alpha: 0.4, blur: 0.8 });
+      g.stroke(g.path(d), col, 0.7, { alpha: 0.9 });
     });
   }
 
@@ -751,6 +815,7 @@
     // can show as a rectangle at the temples.
     g.c.save();
     g.c.clip(capPath);
+    fringeStrands(g, capPath, hair, r);
     tips.forEach(function (p, i) {
       var w = 6.5 + (i % 3) * 1.8 + r() * 1.4;
       var cx = 50 + (p[0] - 50) * 0.75;
