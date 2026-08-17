@@ -161,12 +161,14 @@
   // Measured against the reference: the visible face — bangs to chin — covers
   // only about a fifth of the frame. Drawing it a third of the frame tall was
   // the single biggest thing making the portrait look wrong.
-  var HEAD = "M50,26 C62,26 68,34 68,46 C68,54 66,59 62,63 " +
-             "C58,67.5 54,70 50,70 C46,70 42,67.5 38,63 " +
-             "C34,59 32,54 32,46 C32,34 38,26 50,26 Z";
+  // Wider: the eyes span most of the face width in the reference too, but on
+  // a broader face. Keeping the face narrow made them collide.
+  var HEAD = "M50,25 C64,25 71,33 71,46 C71,55 69,60 64,64 " +
+             "C60,68 54,71 50,71 C46,71 40,68 36,64 " +
+             "C31,60 29,55 29,46 C29,33 36,25 50,25 Z";
 
-  var EYE = { y: 55.5, l: 40.4, r: 59.6, rx: 5.8, ry: 5.4 };
-  var BROW_Y = 49.5, NOSE_Y = 61.5, MOUTH_Y = 64.8, BLUSH_Y = 58.5;
+  var EYE = { y: 55.5, l: 39.8, r: 60.2, rx: 6.6, ry: 5.9 };
+  var BROW_Y = 45, NOSE_Y = 61.5, MOUTH_Y = 64.8, BLUSH_Y = 58.5;
 
   // Hair silhouettes: [backPath, hasVolumeSides]
   function hairBackPath(t) {
@@ -310,10 +312,49 @@
       var d = "M" + n(x0) + ",10 C" + n(bow) + "," + n(30 + r() * 14) +
               " " + n(x1) + "," + n(48 + r() * 16) + " " + n(x1) + "," + n(y1);
       var p = g.path(d);
-      g.stroke(p, deep, 1.8 + r() * 2.6, { clip: clipPath, blur: 1.5, alpha: 0.22 });
-      g.stroke(p, lit, 0.9 + r() * 1.2, { clip: clipPath, blur: 0.9, alpha: 0.26,
-                                          mode: "screen" });
+      g.stroke(p, deep, 2 + r() * 3, { clip: clipPath, blur: 1.6, alpha: 0.3 });
+      g.stroke(p, lit, 1 + r() * 1.6, { clip: clipPath, blur: 0.9, alpha: 0.34,
+                                        mode: "screen" });
     }
+  }
+
+  // Two masses sweeping down over the shoulders, with the same strand
+  // treatment as the rest of the hair.
+  function frontShoulderHair(g, ctx, t, hair, hairLine, r) {
+    if (t.hair === "bob" || t.hair === "buns") return;   // too short to reach
+    var wide = t.hair === "hime" || t.hair === "long";
+    var outL = wide ? 12 : 20, outR = 100 - outL;
+
+    [[1, outL], [-1, outR]].forEach(function (e) {
+      var dir = e[0], x = e[1];
+      var d = "M" + (50 - dir * 14) + ",44" +
+        " C" + (x + dir * 4) + ",58 " + x + ",78 " + (x + dir * 2) + ",118" +
+        " L" + (x - dir * 12) + ",118" +
+        " C" + (x - dir * 8) + ",88 " + (50 - dir * 20) + ",64 " +
+        (50 - dir * 10) + ",46 Z";
+      var p = g.path(d);
+      var lg = ctx.createLinearGradient(0, 44, 0, 118);
+      lg.addColorStop(0, hair[1]);
+      lg.addColorStop(0.5, mix(hair[1], hair[2], 0.4));
+      lg.addColorStop(1, hair[2]);
+      g.soft({ path: p, color: shadowOf(hair[2], 0.5), alpha: 0.3, blur: 3,
+               shift: [dir * -2, 2] });
+      g.fill(p, lg);
+      // a couple of strand lines and a soft highlight down the length
+      g.stroke(g.path("M" + (50 - dir * 12) + ",50 C" + (x + dir * 2) + ",70 " +
+        (x - dir * 2) + ",90 " + (x - dir * 1) + ",116"),
+        lightOf(hair[0], 0.7), 1.6, { clip: p, blur: 1.4, alpha: 0.3, mode: "screen" });
+      g.stroke(g.path("M" + (50 - dir * 16) + ",52 C" + (x + dir * 8) + ",74 " +
+        (x + dir * 2) + ",92 " + (x + dir * 3) + ",116"),
+        shadowOf(hair[2], 0.4), 2, { clip: p, blur: 1.6, alpha: 0.22 });
+      g.soft({ mode: "screen", clip: p, color: lightOf(hair[0], 0.9), alpha: 0.4,
+               blur: 4,
+               path: g.path("M" + (50 - dir * 16) + ",56 C" + (x + dir * 6) + ",70 " +
+                 (x + dir * 2) + ",84 " + (x + dir * 4) + ",96 " +
+                 "L" + (x - dir * 4) + ",94 C" + (x - dir * 6) + ",80 " +
+                 (50 - dir * 26) + ",68 " + (50 - dir * 12) + ",58 Z") });
+      g.ink(p, hairLine, 0.45);
+    });
   }
 
   /* ================= the portrait ====================================== */
@@ -354,10 +395,11 @@
     ctx.save();
     ctx.translate(50, 40); ctx.scale(1.12, 1.04); ctx.translate(-50, -40);
     var back = g.path(hairBackPath(t));
-    var hairGrad = ctx.createLinearGradient(0, 4, 0, 100);
-    hairGrad.addColorStop(0, hair[0]);
-    hairGrad.addColorStop(0.45, hair[1]);
-    hairGrad.addColorStop(1, hair[2]);
+    var hairGrad = ctx.createLinearGradient(0, 4, 0, 110);
+    hairGrad.addColorStop(0, lightOf(hair[0], 0.35));
+    hairGrad.addColorStop(0.3, hair[1]);
+    hairGrad.addColorStop(0.7, mix(hair[1], hair[2], 0.7));
+    hairGrad.addColorStop(1, shadowOf(hair[2], 0.35));
     g.fill(back, hairGrad);
     // shade only where the hair turns away from the light, not a disc over
     // the whole mass — that had painted a dark column down the middle
@@ -365,6 +407,14 @@
                           "C92,30 78,4 50,4 Z"),
              clip: back, color: shadowOf(hair[2], 0.5), alpha: 0.3, blur: 6 });
     hairStrands(g, back, hair, rng(t.strandSeed ^ 0x5bf03635));
+    // the head occludes the hair behind it — an ambient shadow around the face
+    g.soft({ path: g.path("M50,18 C30,18 22,40 24,64 C28,86 40,96 50,96 " +
+                          "C60,96 72,86 76,64 C78,40 70,18 50,18 Z"),
+             clip: back, color: shadowOf(hair[2], 0.6), alpha: 0.4, blur: 7 });
+    // the fringe sits proud of the mass and shadows it
+    g.soft({ path: g.path("M14,4 C14,40 30,52 50,52 C70,52 86,40 86,4 Z"),
+             clip: back, color: shadowOf(hair[2], 0.55), alpha: 0.35, blur: 4,
+             shift: [0, 4] });
     g.ink(back, hairLine, 0.62);
     ctx.restore();
 
@@ -372,6 +422,10 @@
 
     /* ---- torso ---- */
     torso(g, ctx, t, skin, cloth, skinLine);
+
+    // Hair falling in front of the shoulders. Drawn entirely behind the body,
+    // the figure looked like a head resting on a bare torso.
+    frontShoulderHair(g, ctx, t, hair, hairLine, rng(t.strandSeed ^ 0x1d872b41));
 
     ctx.save();
     ctx.translate(0, -10);
@@ -386,10 +440,10 @@
 
     // modelling: hair shadow across the forehead, temples, jaw, chin
     g.soft({ path: g.path("M24,0 C24,42 34,48 50,48 C66,48 76,42 76,0 Z"),
-             clip: head, color: shadowOf(skin[2], 0.35), alpha: 0.62, blur: 3.2 });
-    g.soft({ path: g.path("M31,40 C29,50 32,58 37,64 L28,66 L27,44 Z"),
+             clip: head, color: shadowOf(skin[2], 0.45), alpha: 0.72, blur: 3 });
+    g.soft({ path: g.path("M30,40 C28,50 31,58 36,64 L27,66 L26,44 Z"),
              clip: head, color: shadowOf(skin[2], 0.3), alpha: 0.3, blur: 4 });
-    g.soft({ path: g.path("M69,40 C71,50 68,58 63,64 L72,66 L73,44 Z"),
+    g.soft({ path: g.path("M70,40 C72,50 69,58 64,64 L73,66 L74,44 Z"),
              clip: head, color: shadowOf(skin[2], 0.3), alpha: 0.3, blur: 4 });
     g.soft({ path: g.path("M41,63 C45,68 55,68 59,63 C57,70 43,70 41,63 Z"),
              clip: head, color: shadowOf(skin[2], 0.35), alpha: 0.35, blur: 3 });
@@ -399,18 +453,18 @@
     g.soft({ mode: "screen", clip: g.path(HEAD), color: lightOf(skin[0], 0.9), alpha: 0.4,
              blur: 3.5, path: g.path("M63,57 m-5,0 a5,3.2 0 1,0 10,0 a5,3.2 0 1,0 -10,0") });
     g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.3), alpha: 0.28, blur: 3,
-             path: g.path("M32,58 C34,63 39,67 43,68 L31,68 Z") });
+             path: g.path("M30,58 C32,64 38,68 42,69 L29,69 Z") });
     g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.3), alpha: 0.28, blur: 3,
-             path: g.path("M68,58 C66,63 61,67 57,68 L69,68 Z") });
+             path: g.path("M70,58 C68,64 62,68 58,69 L71,69 Z") });
     // sockets around the eyes and a shadow beside the nose — without these the
     // face is a flat wash however soft the rest of the shading is
-    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.3, blur: 2.6,
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.18, blur: 3,
              path: g.path("M" + (EYE.l - 8) + "," + (EYE.y - 5) +
                           " C" + (EYE.l - 4) + "," + (EYE.y - 9) + " " + (EYE.l + 5) + "," +
                           (EYE.y - 9) + " " + (EYE.l + 8) + "," + (EYE.y - 4) +
                           " C" + EYE.l + "," + (EYE.y - 6) + " " + (EYE.l - 5) + "," +
                           (EYE.y - 5) + " " + (EYE.l - 8) + "," + (EYE.y - 5) + " Z") });
-    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.3, blur: 2.6,
+    g.soft({ clip: g.path(HEAD), color: shadowOf(skin[2], 0.35), alpha: 0.18, blur: 3,
              path: g.path("M" + (EYE.r + 8) + "," + (EYE.y - 5) +
                           " C" + (EYE.r + 4) + "," + (EYE.y - 9) + " " + (EYE.r - 5) + "," +
                           (EYE.y - 9) + " " + (EYE.r - 8) + "," + (EYE.y - 4) +
@@ -517,11 +571,22 @@
                           "C68,87 60,90 50,90 Z"),
              clip: top, color: shadowOf(cloth[2], 0.35), alpha: 0.18, blur: 4 });
     g.ink(top, mix(cloth[2], "#7a5560", 0.35), 0.42);
-    // the heart motif on the chest
+    // the heart motif, tone on tone rather than a printed logo
     g.stroke(g.path("M50,104 C46,98 38,98 38,104 C38,110 45,113 50,115"),
-             lightOf(cloth[0], 0.85), 1.6, { clip: top, alpha: 0.75 });
+             lightOf(cloth[0], 0.9), 2, { clip: top, alpha: 0.4, blur: 0.8 });
     g.stroke(g.path("M50,104 C54,98 62,98 62,104 C62,110 55,113 50,115"),
-             lightOf(cloth[0], 0.85), 1.6, { clip: top, alpha: 0.75 });
+             lightOf(cloth[0], 0.9), 2, { clip: top, alpha: 0.4, blur: 0.8 });
+    // the fabric follows a body underneath: light where it lifts, shadow
+    // where it falls away at the sides and under the bust
+    g.soft({ mode: "screen", clip: top, color: lightOf(cloth[0], 0.9), alpha: 0.3,
+             blur: 5,
+             path: g.path("M40,96 C34,102 33,112 35,118 L60,118 C62,112 61,102 55,96 Z") });
+    g.soft({ clip: top, color: shadowOf(cloth[2], 0.45), alpha: 0.28, blur: 5,
+             path: g.path("M11,118 C12,104 16,94 22,88 L30,92 C24,100 21,110 21,118 Z") });
+    g.soft({ clip: top, color: shadowOf(cloth[2], 0.45), alpha: 0.28, blur: 5,
+             path: g.path("M89,118 C88,104 84,94 78,88 L70,92 C76,100 79,110 79,118 Z") });
+    g.soft({ clip: top, color: shadowOf(cloth[2], 0.4), alpha: 0.22, blur: 4,
+             path: g.path("M36,112 C42,116 58,116 64,112 C58,120 42,120 36,112 Z") });
 
     // thin straps over the bare shoulders
     ["M36,89 C33,84 30,80 27,77", "M64,89 C67,84 70,80 73,77"].forEach(function (d) {
@@ -550,21 +615,22 @@
   function ears(g, ctx, t, hair, hairLine, skin) {
     var L, R, LI, RI;
     if (t.ears === "round") {
-      L = "M35,28 C28,25 27,14 34,12 C41,10 44,17 43,24 Z";
-      R = "M65,28 C72,25 73,14 66,12 C59,10 56,17 57,24 Z";
-      LI = "M36,25 C32,23 32,16 35,15 C39,15 41,20 40,23 Z";
-      RI = "M64,25 C68,23 68,16 65,15 C61,15 59,20 60,23 Z";
+      L = "M33,31 C24,27 22,11 31,7 C40,5 45,15 44,26 Z";
+      R = "M67,31 C76,27 78,11 69,7 C60,5 55,15 56,26 Z";
+      LI = "M35,27 C28,24 27,13 33,11 C39,11 42,18 41,25 Z";
+      RI = "M65,27 C72,24 73,13 67,11 C61,11 58,18 59,25 Z";
     } else if (t.ears === "folded") {
-      L = "M35,28 C29,21 31,12 38,13 C44,14 46,20 45,25 C42,21 37,22 35,28 Z";
-      R = "M65,28 C71,21 69,12 62,13 C56,14 54,20 55,25 C58,21 63,22 65,28 Z";
-      LI = "M37,24 C33,19 35,15 39,16 C42,17 43,21 42,23 Z";
-      RI = "M63,24 C67,19 65,15 61,16 C58,17 57,21 58,23 Z";
+      L = "M33,31 C25,22 27,8 36,8 C44,10 47,18 46,26 C42,20 36,23 33,31 Z";
+      R = "M67,31 C75,22 73,8 64,8 C56,10 53,18 54,26 C58,20 64,23 67,31 Z";
+      LI = "M35,26 C29,19 31,12 37,12 C42,14 44,20 43,25 Z";
+      RI = "M65,26 C71,19 69,12 63,12 C58,14 56,20 57,25 Z";
     } else {
-      // pointy: a tall triangle with a soft outer curve, like the reference
-      L = "M34,30 C27,22 24,10 26,4 C34,8 44,17 47,27 Z";
-      R = "M66,30 C73,22 76,10 74,4 C66,8 56,17 53,27 Z";
-      LI = "M36,26 C31,20 30,13 31,9 C37,13 42,19 44,25 Z";
-      RI = "M64,26 C69,20 70,13 69,9 C63,13 58,19 56,25 Z";
+      // Cat, not rabbit: a wide base and a shorter shell. Narrow and tall
+      // read as lop ears however well they were shaded.
+      L = "M30,34 C24,27 20,16 23,8 C33,13 42,22 45,31 Z";
+      R = "M70,34 C76,27 80,16 77,8 C67,13 58,22 55,31 Z";
+      LI = "M32,30 C27,24 25,17 27,12 C34,17 40,24 42,30 Z";
+      RI = "M68,30 C73,24 75,17 73,12 C66,17 60,24 58,30 Z";
     }
     [[L, LI], [R, RI]].forEach(function (pair) {
       var outer = g.path(pair[0]), inner = g.path(pair[1]);
@@ -583,8 +649,8 @@
   }
 
   function blush(g, head, skin) {
-    [32.5, 67.5].forEach(function (x) {
-      var p = g.path("M" + x + "," + BLUSH_Y + " m-6.5,0 a6.5,3.8 0 1,0 13,0 a6.5,3.8 0 1,0 -13,0");
+    [31.5, 68.5].forEach(function (x) {
+      var p = g.path("M" + x + "," + BLUSH_Y + " m-7,0 a7,4 0 1,0 14,0 a7,4 0 1,0 -14,0");
       g.soft({ path: p, clip: head, color: "#f2758f", alpha: 0.34, blur: 3.4 });
     });
     // a hint of warmth across the nose, which ties the two cheeks together
@@ -707,10 +773,10 @@
       " C" + (cx - o * rx * 0.8) + "," + (y - ry * 0.95) +
       " " + (cx + o * rx * 0.1) + "," + (y - ry * 1.42) +
       " " + (cx + o * rx * 0.92) + "," + (y - ry * 0.78) +
-      " L" + (cx + o * rx * 1.14) + "," + (y - ry * 1.08) +
-      " C" + (cx + o * rx * 0.72) + "," + (y - ry * 1.62) +
-      " " + (cx - o * rx * 0.35) + "," + (y - ry * 1.5) +
-      " " + (cx - o * rx * 1.06) + "," + (y + ry * 0.1) + " Z");
+      " L" + (cx + o * rx * 1.16) + "," + (y - ry * 1.1) +
+      " C" + (cx + o * rx * 0.7) + "," + (y - ry * 1.62) +
+      " " + (cx - o * rx * 0.35) + "," + (y - ry * 1.56) +
+      " " + (cx - o * rx * 1.06) + "," + (y + ry * 0.08) + " Z");
     g.soft({ path: lash, color: lashCol, alpha: 0.3, blur: 0.8, mode: "source-over" });
     g.fill(lash, lashCol);
 
@@ -730,6 +796,13 @@
     g.soft({ path: g.path("M" + (cx - o * rx * 0.92) + "," + (y + ry * 0.3) +
       " m-1.5,0 a1.5,1.1 0 1,0 3,0 a1.5,1.1 0 1,0 -3,0"),
       color: "#e88ea0", alpha: 0.45, blur: 1 });
+    // reddish liner where the lash sweeps out, which the reference has under
+    // the black and is most of what makes the outer corner feel drawn
+    g.stroke(g.path("M" + (cx + o * rx * 0.5) + "," + (y - ry * 1.2) +
+      " C" + (cx + o * rx * 0.95) + "," + (y - ry * 1.15) +
+      " " + (cx + o * rx * 1.15) + "," + (y - ry * 0.95) +
+      " " + (cx + o * rx * 1.3) + "," + (y - ry * 1.25)),
+      "#c4586a", 1.1, { alpha: 0.55, blur: 0.5 });
   }
 
   function brows(g, t, skin) {
@@ -755,16 +828,26 @@
     var my = MOUTH_Y;
     var lip = mix(skinLine, "#c4566f", 0.5);
     if (t.mouth === "open") {
-      var m = g.path("M47.4," + my + " C48.4," + (my + 3.4) + " 51.6," + (my + 3.4) +
-                     " 52.6," + my + " C51," + (my + 1) + " 49," + (my + 1) +
-                     " 47.4," + my + " Z");
+      var m = g.path("M46.9," + my + " C48.1," + (my + 4) + " 51.9," + (my + 4) +
+                     " 53.1," + my + " C51.2," + (my + 1.1) + " 48.8," + (my + 1.1) +
+                     " 46.9," + my + " Z");
       g.fill(m, "#a03c58");
       g.soft({ path: m, color: "#5e2036", alpha: 0.6, blur: 0.8, shift: [0, -0.6] });
-      var tongue = g.path("M48.6," + (my + 1.9) + " C49.2," + (my + 3.4) + " 50.8," + (my + 3.4) +
-                          " 51.4," + (my + 1.9) + " C50.5," + (my + 1.5) + " 49.5," + (my + 1.5) +
-                          " 48.6," + (my + 1.9) + " Z");
+      // upper teeth: a thin bright edge just inside the top lip
+      g.c.save();
+      g.c.clip(m);
+      g.stroke(g.path("M47.2," + (my + 0.5) + " C48.6," + (my + 1.5) + " 51.4," +
+               (my + 1.5) + " 52.8," + (my + 0.5)), "#fffaf6", 1.5, { alpha: 0.95 });
+      g.c.restore();
+      var tongue = g.path("M48.5," + (my + 2.4) + " C49.1," + (my + 4) + " 50.9," + (my + 4) +
+                          " 51.5," + (my + 2.4) + " C50.5," + (my + 2) + " 49.5," + (my + 2) +
+                          " 48.5," + (my + 2.4) + " Z");
       g.fill(tongue, "#f2839f");
       g.ink(m, lip, 0.35);
+      g.soft({ path: g.path("M46," + (my - 1.2) + " C48," + (my + 0.4) + " 52," +
+               (my + 0.4) + " 54," + (my - 1.2) + " C52," + (my + 1) + " 48," +
+               (my + 1) + " 46," + (my - 1.2) + " Z"),
+               color: "#e08498", alpha: 0.35, blur: 1 });
       // a bright edge on the lower lip
       g.stroke(g.path("M48.2," + (my + 2.9) + " C49.2," + (my + 3.9) + " 50.8," + (my + 3.9) +
                " 51.8," + (my + 2.9)), "#ffd9dd", 0.45, { alpha: 0.55, blur: 0.4, mode: "screen" });
@@ -787,10 +870,17 @@
     var tips = bangTips(t);
 
     // base cap under the strands, slightly deeper so the strands read on top
+    // The hem dips back up between tips, so the fringe reads as separate
+    // locks with forehead showing between them rather than one smooth arc.
     var cap = "M14,52 C14,14 32,2 50,2 C68,2 86,14 86,52";
-    tips.forEach(function (p) {
+    tips.forEach(function (p, i) {
       cap += " C" + (p[0] + 5) + "," + (p[1] - 7) +
-             " " + (p[0] + 2) + "," + (p[1] - 1) + " " + p[0] + "," + p[1];
+             " " + (p[0] + 2.5) + "," + (p[1] - 1) + " " + p[0] + "," + p[1];
+      if (i < tips.length - 1) {
+        var nx = (p[0] + tips[i + 1][0]) / 2;
+        cap += " C" + (p[0] - 2) + "," + (p[1] - 4) +
+               " " + (nx + 1) + "," + (p[1] - 8) + " " + nx + "," + (p[1] - 7);
+      }
     });
     cap += " L14,52 Z";
     var capPath = g.path(cap);
@@ -840,7 +930,7 @@
     // the sheen band: blurred, screened, with a broken lower edge
     var sheen = g.path("M28,26 C36,16 64,16 72,26 C70,32 66,28 62,31 " +
                        "C58,34 54,29 50,31 C46,34 42,29 38,31 C34,34 30,31 28,26 Z");
-    g.soft({ mode: "screen", path: sheen, color: lightOf(hair[0], 0.8), alpha: 0.28, blur: 4 });
+    g.soft({ mode: "screen", path: sheen, color: lightOf(hair[0], 0.9), alpha: 0.42, blur: 3.4 });
 
     // rim light along the top of the silhouette
     g.stroke(g.path("M20,40 C20,12 34,2 50,2 C66,2 80,12 80,40"),
@@ -919,7 +1009,7 @@
     ctx.save();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.globalCompositeOperation = "soft-light";
-    ctx.globalAlpha = 0.12;
+    ctx.globalAlpha = 0.08;
     ctx.fillStyle = "#ffd9a8";
     ctx.fillRect(0, 0, S, S);
     ctx.restore();
@@ -968,6 +1058,8 @@
     var o = out.getContext("2d");
     o.imageSmoothingEnabled = true;
     o.imageSmoothingQuality = "high";
+    // The painting passes are all low-contrast by nature; put some back.
+    o.filter = "contrast(1.1) saturate(1.14)";
     o.drawImage(big, 0, 0, size, size);
     return out;
   }
