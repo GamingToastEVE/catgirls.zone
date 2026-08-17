@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kaomoji search — catgirls.zone</title>
+<meta name="description" content="A searchable pile of (=^･ω･^=) and relatives. Type to filter, arrows to move, enter to copy.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9C%A8%3C/text%3E%3C/svg%3E">
+<style>
+  .searchbar { position: sticky; top: 0; z-index: 5; padding: 10px 0 14px; background: linear-gradient(180deg, var(--bg) 72%, transparent); }
+  .searchbar input { font-size: 1.05rem; padding: 14px 16px; }
+
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .tags button {
+    padding: 5px 11px;
+    font: .8rem/1 var(--mono);
+    border-radius: 999px;
+    color: var(--muted);
+  }
+  .tags button[aria-pressed="true"] { border-color: var(--cyan); color: var(--cyan); }
+
+  .results {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 8px;
+    margin-top: 16px;
+  }
+  .kao {
+    text-align: left;
+    padding: 14px 12px;
+    border-radius: 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .kao .face {
+    display: block;
+    font: 1.12rem/1.5 var(--mono);
+    color: var(--fg);
+    margin-bottom: 5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .kao .name { display: block; font-size: .78rem; color: var(--muted); }
+  .kao:hover, .kao:focus-visible { border-color: var(--pink); outline: none; }
+  .kao.sel { border-color: var(--cyan); background: var(--panel-2); }
+
+  .recent { margin-top: 26px; }
+  .empty { color: var(--muted); margin-top: 26px; }
+  .count { color: var(--muted); font-size: .85rem; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Kaomoji</h1>
+  <p class="lede">
+    Type to filter by mood or tag, <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd>
+    to move, <kbd>Enter</kbd> to copy. Click works too. Everything is in this
+    page — no requests once it has loaded.
+  </p>
+
+  <div class="searchbar">
+    <input type="search" id="q" placeholder="happy, cat, shrug, angry, love…" autofocus
+           autocomplete="off" spellcheck="false" aria-label="Search kaomoji">
+    <div class="tags" id="tags"></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="results" id="results"></div>
+  <p class="empty" id="empty" hidden>Nothing matches that. Try a mood: happy, sad, angry, love, cat.</p>
+
+  <section class="recent" id="recent-wrap" hidden>
+    <h2>Recently copied</h2>
+    <div class="results" id="recent"></div>
+  </section>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/kaomoji.js"></script>
+<script src="/assets/kaomoji-app.js"></script>
+</body>
+</html>

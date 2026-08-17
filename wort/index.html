@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily word game — catgirls.zone</title>
+<meta name="description" content="One five-letter word a day, the same for everyone, derived from the date. Six guesses, streaks kept in your browser.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%9F%A9%3C/text%3E%3C/svg%3E">
+<style>
+  .game { max-width: 420px; margin: 0 auto; }
+  .board { display: grid; grid-template-rows: repeat(6, 1fr); gap: 6px; margin: 18px 0; }
+  .brow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .cell {
+    aspect-ratio: 1;
+    display: grid;
+    place-items: center;
+    font: 700 clamp(1.3rem, 6vw, 2rem)/1 var(--mono);
+    text-transform: uppercase;
+    border: 2px solid var(--line);
+    border-radius: 8px;
+    background: #100d1a;
+    transition: background .18s ease, border-color .18s ease, transform .12s ease;
+  }
+  .cell.filled { border-color: #4b4166; }
+  .cell.pop { transform: scale(1.06); }
+  .cell.hit { background: #3f7d46; border-color: #3f7d46; color: #fff; }
+  .cell.near { background: #9a8434; border-color: #9a8434; color: #fff; }
+  .cell.miss { background: #2a2438; border-color: #2a2438; color: var(--muted); }
+
+  .keys { display: grid; gap: 6px; margin-top: 14px; }
+  .krow { display: flex; gap: 5px; justify-content: center; }
+  .keys button {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 13px 4px;
+    font: 600 .82rem/1 var(--mono);
+    text-transform: uppercase;
+    border-radius: 7px;
+  }
+  .keys button.wide { flex: 1.6 1 auto; font-size: .72rem; }
+  .keys button.hit { background: #3f7d46; border-color: #3f7d46; color: #fff; }
+  .keys button.near { background: #9a8434; border-color: #9a8434; color: #fff; }
+  .keys button.miss { background: #191527; border-color: #191527; color: #5d5478; }
+
+  .msg { min-height: 26px; text-align: center; font-size: .95rem; margin-top: 4px; }
+  .shake { animation: shake .4s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .stats { display: flex; gap: 18px; justify-content: center; margin-top: 6px; }
+  .stat { text-align: center; }
+  .stat b { display: block; font: 700 1.4rem/1.2 var(--mono); }
+  .stat span { font-size: .74rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .done { text-align: center; margin-top: 16px; }
+  .grid-share { font: 1.1rem/1.15 var(--mono); letter-spacing: 2px; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <div class="game">
+    <h1 style="text-align:center">Daily word</h1>
+    <p class="lede" style="text-align:center;margin-bottom:0">
+      Five letters, six guesses. Everyone gets the same word today —
+      it comes from the date, not from a server.
+    </p>
+
+    <div class="board" id="board"></div>
+    <div class="msg" id="msg"></div>
+    <div class="keys" id="keys"></div>
+
+    <div class="done" id="done" hidden>
+      <div class="grid-share" id="share-grid"></div>
+      <div class="row" style="justify-content:center">
+        <button class="primary" id="share">Copy result</button>
+      </div>
+      <div class="stats" id="stats"></div>
+      <p class="small muted" id="next"></p>
+    </div>
+  </div>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/words.js"></script>
+<script src="/assets/wort.js"></script>
+</body>
+</html>

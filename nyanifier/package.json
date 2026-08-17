@@ -1,0 +1,11 @@
+{
+  "name": "nyanify",
+  "version": "1.0.0",
+  "description": "Turn text into cat nonsense, in four escalating levels. Deterministic, no dependencies.",
+  "main": "nyanify.js",
+  "bin": { "nyanify": "cli.js" },
+  "files": ["nyanify.js", "cli.js"],
+  "keywords": ["uwu", "nya", "text", "transform", "deterministic"],
+  "license": "CC0-1.0",
+  "repository": "github:GamingToastEVE/catgirls.zone"
+}

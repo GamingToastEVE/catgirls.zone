@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>catgirls.zone</title>
+<meta name="description" content="Five small things that run entirely in your browser: a developer tool belt, a daily word game, a kaomoji search engine, a text transformer, and an idle game.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B1%3C/text%3E%3C/svg%3E">
+<style>
+  .hero { padding: 26px 0 10px; }
+  .hero h1 { font-size: clamp(2.2rem, 6vw, 3.4rem); }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 14px;
+    margin-top: 24px;
+  }
+  .card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background: linear-gradient(180deg, var(--panel), #171325);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 18px;
+    transition: transform .12s ease, border-color .12s ease;
+  }
+  .card:hover { transform: translateY(-3px); border-color: var(--pink); color: inherit; }
+  .card h3 { margin: 0 0 6px; font-size: 1.06rem; letter-spacing: -0.01em; }
+  .card p { margin: 0; color: var(--muted); font-size: .92rem; }
+  .card .path { font: .78rem var(--mono); color: var(--cyan); display: block; margin-bottom: 9px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <section class="hero">
+    <h1>catgirls.zone</h1>
+    <p class="lede">
+      Five small things, each on its own path. All of them run entirely in your
+      browser — no accounts, no servers, nothing uploaded. Close the tab and
+      nothing of yours went anywhere.
+    </p>
+  </section>
+
+  <div class="grid">
+    <a class="card" href="/tools/">
+      <span class="path">/tools</span>
+      <h3>Developer tool belt</h3>
+      <p>Base64, JWT decoding, UUIDs, hashes, a regex tester, cron parsing,
+         timestamps, JSON formatting and a text diff. The pile of things you
+         normally paste into somebody else's ad-riddled website.</p>
+    </a>
+
+    <a class="card" href="/wort/">
+      <span class="path">/wort</span>
+      <h3>Daily word game</h3>
+      <p>One five-letter puzzle a day, the same for everyone, derived from the
+         date. Six guesses, a streak that survives reloads, and a spoiler-free
+         result grid to share.</p>
+    </a>
+
+    <a class="card" href="/kaomoji/">
+      <span class="path">/kaomoji</span>
+      <h3>Kaomoji search</h3>
+      <p>A searchable pile of (=^･ω･^=) and relatives. Type to filter, arrow
+         keys to move, enter to copy. No network requests once the page has
+         loaded.</p>
+    </a>
+
+    <a class="card" href="/nyanifier/">
+      <span class="path">/nyanifier</span>
+      <h3>Nyanifier</h3>
+      <p>Text in, cat nonsense out, in four escalating levels. Deterministic —
+         the same text always transforms the same way. Usable as a library and
+         a command line tool too.</p>
+    </a>
+
+    <a class="card" href="/cafe/">
+      <span class="path">/cafe</span>
+      <h3>Catgirl Café</h3>
+      <p>An idle game made of numbers and curves: staff, upgrades, compounding
+         multipliers and offline earnings. Saves to your browser.</p>
+    </a>
+  </div>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script>UI.boot();</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+/* catgirls.zone/wort — the word list.
+ *
+ * 1034 five-letter words, serving both as the pool of daily answers and as
+ * the set of accepted guesses. Checked at build time: all lowercase a-z, all
+ * exactly five letters, no duplicates.
+ */
+window.WORDS = (
+"  about above abuse actor acute admit adopt adult after again agent " +
+"  agree ahead alarm album alert alike alive allow alone along alter " +
+"  among anger angle angry ankle apart apple apply arena argue arise " +
+"  armor array arrow aside asset audio audit avoid awake award aware " +
+"  badly baker basic basin batch beach beard beast began begin begun " +
+"  being belly below bench berry birth black blade blame blank blast " +
+"  blaze bleed blend bless blind block blood bloom blown blues blunt " +
+"  blush board boast bonus boost booth bound brain brake brand brave " +
+"  bread break breed brick bride brief bring brisk broad broke brook " +
+"  broom brown brush build built bunch burnt burst buyer cabin cable " +
+"  cache camel canal candy canon cargo carry carve catch cause cease " +
+"  chain chair chalk charm chart chase cheap cheat check cheek cheer " +
+"  chess chest chief child chill china choir chose chunk churn cider " +
+"  cigar civic civil claim clash class clean clear clerk click cliff " +
+"  climb cling cloak clock close cloth cloud clown coach coast cobra " +
+"  cocoa colon color combo comet comic coral couch cough could count " +
+"  court cover crack craft crane crash crawl crazy cream creek creep " +
+"  crest crime crisp cross crowd crown crude cruel crumb crush curve " +
+"  cycle daily dairy dance dated dealt death debut decay decor delay " +
+"  delta dense depth derby devil diary dizzy dodge doing donor doubt " +
+"  dough dozen draft drain drama drank drawn dread dream dress dried " +
+"  drift drill drink drive drone drove drown druid drunk dryer dwell " +
+"  dwelt eager eagle early earth easel eaten ebony eight elbow elder " +
+"  elect elite email ember empty enemy enjoy enter entry equal equip " +
+"  erase error essay ether event every exact excel exile exist extra " +
+"  fable faced faint fairy faith false fancy fatal fault favor feast " +
+"  fence ferry fetch fever fewer fiber field fiery fifth fifty fight " +
+"  final finch first fixed flame flash fleet flesh flick fling flint " +
+"  float flock flood floor flour fluid flush focal focus foggy folly " +
+"  force forge forth forty forum found frame fraud fresh fried front " +
+"  frost frown froze fruit fully funny gauge ghost giant given giver " +
+"  glade gland glare glass gleam glide globe gloom glory glove glued " +
+"  going grace grade grain grand grant grape graph grasp grass grave " +
+"  gravy graze great greed green greet grief grill grind groan groom " +
+"  gross group grove growl grown guard guess guest guide guild guilt " +
+"  habit hairy handy happy hardy harsh haste hatch haven havoc heart " +
+"  heavy hedge hefty hello hence herbs hobby holly honey honor horse " +
+"  hotel hound house hover human humid humor hurry ideal image imply " +
+"  inbox index inner input irony issue ivory jelly jewel joint jolly " +
+"  judge juice juicy jumbo karma kayak kneel knife knock known koala " +
+"  label labor laden lager lance lapse large laser latch later laugh " +
+"  layer learn lease leash least leave ledge lemon level lever light " +
+"  lilac limbo limit linen liner liver llama lobby local lodge logic " +
+"  loose lorry lower loyal lucky lunar lunch lyric magic magma maize " +
+"  major maker mango manor maple march marsh mason match maybe mayor " +
+"  meant medal media melon mercy merge merit merry metal meter micro " +
+"  midst might minor minus mixed model moist money month moral motor " +
+"  mound mount mourn mouse mouth movie mower muddy mummy mural music " +
+"  naive nasty naval navel needy nerve never newer newly niche night " +
+"  ninja noble noise noisy north noted novel nurse nylon oasis occur " +
+"  ocean offer often olive onion opera orbit order organ other otter " +
+"  ought ounce outer owner oxide ozone paint panel panic paper parka " +
+"  party pasta paste patch patio pause peace peach pearl pedal penny " +
+"  perch peril petal phase phone photo piano picky piece pilot pinch " +
+"  pitch pivot pixel pizza place plaid plain plane plank plant plate " +
+"  plaza pluck plumb plump plush point polar polka porch pouch pound " +
+"  power prank press price pride prime print prior prism prize probe " +
+"  prone proof proud prove prune pulse punch pupil puppy purse queen " +
+"  query quest queue quick quiet quill quilt quirk quite quota quote " +
+"  radar radio raise rally ranch range rapid ratio raven reach ready " +
+"  realm rebel refer reign relax relay renew repay reply rider ridge " +
+"  rifle right rigid rinse risen risky rival river roast robin robot " +
+"  rocky rogue roman rough round route royal rugby ruler rumor rural " +
+"  rusty sadly saint salad salon salty sandy satin sauce sauna scale " +
+"  scalp scare scarf scene scent scoop scope score scout scrap screw " +
+"  scrub seize sense serve seven shade shaft shake shall shame shape " +
+"  share shark sharp shave sheep sheer sheet shelf shell shift shine " +
+"  shiny shirt shock shoot shore short shout shown shrub shrug sight " +
+"  silly since siren sixth sixty skate skill skirt skull slate slave " +
+"  sleek sleep slice slide slime sling slope small smart smash smell " +
+"  smile smoke snack snake sneak sniff snowy solar solid solve sonic " +
+"  sorry sound south space spare spark speak spear speed spell spend " +
+"  spent spice spicy spike spill spine spite split spoke spoon sport " +
+"  spray spree squad squat stack staff stage stain stair stake stale " +
+"  stalk stall stamp stand stare stark start state steak steal steam " +
+"  steel steep steer stern stick stiff still sting stock stole stone " +
+"  stood stool store storm story stout stove strap straw stray strip " +
+"  stuck study stuff stump stung style sugar suite sunny super surge " +
+"  sushi swamp swarm swear sweat sweep sweet swell swept swift swing " +
+"  sword syrup table taken tally tango tarot taste teach tempo tenor " +
+"  tense tenth thank theft their theme there these thick thief thigh " +
+"  thing think third thorn those three threw throw thumb thump tidal " +
+"  tiger tight timer title toast today token tonic tooth topic torch " +
+"  total touch tough tower toxic trace track trade trail train trait " +
+"  tramp trash treat trend trial tribe trick tried tries troop trout " +
+"  truck truly trunk trust truth tulip tumor tutor twice twist ultra " +
+"  uncle under union unite unity until upper upset urban usage usher " +
+"  usual utter vague valid value valve vapor vault vegan venue verse " +
+"  video vigor villa vinyl viral virus visit vital vivid vocal vodka " +
+"  vogue voice voter vowel wafer wager wagon waist waste watch water " +
+"  weary weave wedge weigh weird whale wheat wheel where which while " +
+"  whirl white whole whose widen wider width wield witch woman women " +
+"  world worry worse worst worth would wound woven wrath wreck wrist " +
+"  write wrong wrote yacht yeast yield young yours youth zebra zesty "
+).trim().split(/\s+/);

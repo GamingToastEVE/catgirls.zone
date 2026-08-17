@@ -1,6 +1,57 @@
 # catgirls.zone
 
-Clean slate. Nothing here yet.
+Five small things, each on its own path. Everything runs in the browser — no
+backend, no accounts, no analytics, nothing uploaded.
 
-The previous contents (a deterministic avatar generator) are still in the git
-history at `8b82570` if they are ever wanted back.
+| Path          | What it is                                                        |
+| ------------- | ----------------------------------------------------------------- |
+| `/tools`      | Developer tool belt: Base64, JWT decoding, UUIDs, hashes, regex tester, cron parser, timestamps, JSON formatter, text diff |
+| `/wort`       | One five-letter word puzzle a day, derived from the date          |
+| `/kaomoji`    | Searchable kaomoji collection, keyboard driven                    |
+| `/nyanifier`  | Text transformer in four levels — also a library and a CLI        |
+| `/cafe`       | Idle game: staff, upgrades, prestige, offline earnings            |
+
+## Why client-side
+
+The tool belt is the clearest case: people paste production tokens and customer
+data into random websites to decode them. Here the page is the whole program —
+open the network tab and watch it stay empty.
+
+## Layout
+
+```
+assets/          shared stylesheet, tiny DOM helpers, one script per app
+  site.css       the whole design system, such as it is
+  ui.js          $ / el / toast / clipboard / shared header
+  words.js       1034 five-letter words, generated and verified
+  kaomoji.js     the kaomoji data
+nyanifier/
+  nyanify.js     the library — UMD, works in a browser and in node
+  cli.js         command line wrapper
+  package.json   so it can be published as a package
+```
+
+## Development
+
+Static files, no build step:
+
+```sh
+python3 -m http.server 8000
+```
+
+## Notable details
+
+- **The word game** derives its answer from the local date, so the puzzle rolls
+  over at the player's midnight rather than in the middle of their evening. The
+  word list is shuffled once with a fixed seed, otherwise answers would march
+  through the alphabet.
+- **The nyanifier** is deterministic: the randomness is seeded from the input,
+  so the same text always transforms the same way. URLs, e-mail addresses,
+  handles and backticked code are pulled out before transformation and put back
+  afterwards.
+- **The café** grants offline earnings capped at eight hours, and stores
+  everything in one localStorage key you can export as a string.
+
+## License
+
+CC0 / public domain.

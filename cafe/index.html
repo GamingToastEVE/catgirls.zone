@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Catgirl Café — catgirls.zone</title>
+<meta name="description" content="An idle game made of numbers and curves: staff, upgrades, compounding multipliers and offline earnings. Saves to your browser.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%98%95%3C/text%3E%3C/svg%3E">
+<style>
+  .top { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; }
+  @media (max-width: 620px) { .top { grid-template-columns: 1fr; } }
+  .coins { font: 700 clamp(1.8rem, 5vw, 2.6rem)/1.1 var(--mono); letter-spacing: -0.02em; }
+  .rate { color: var(--muted); font: .95rem var(--mono); }
+  .serve { font-size: 1.05rem; padding: 16px 26px; }
+
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; align-items: start; }
+  @media (max-width: 820px) { .cols { grid-template-columns: 1fr; } }
+
+  .buy {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 4px 12px;
+    width: 100%;
+    text-align: left;
+    padding: 11px 13px;
+    margin-bottom: 7px;
+    align-items: center;
+  }
+  .buy:disabled { opacity: .5; }
+  .buy b { font-size: .96rem; }
+  .buy .sub { grid-column: 1; font-size: .78rem; color: var(--muted); }
+  .buy .cost { grid-row: 1 / span 2; font: 600 .92rem var(--mono); color: var(--amber); text-align: right; }
+  .buy .own { font: .8rem var(--mono); color: var(--cyan); }
+  .buy.afford { border-color: #4a6f52; }
+
+  .bar { height: 4px; background: #100d1a; border-radius: 3px; overflow: hidden; margin-top: 6px; grid-column: 1 / -1; }
+  .bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--pink), var(--cyan)); }
+
+  .float {
+    position: absolute;
+    pointer-events: none;
+    font: 700 1rem var(--mono);
+    color: var(--lime);
+    animation: rise 900ms ease-out forwards;
+  }
+  @keyframes rise { to { transform: translateY(-46px); opacity: 0; } }
+  .servewrap { position: relative; display: inline-block; }
+  .log { font: .84rem/1.7 var(--mono); color: var(--muted); max-height: 150px; overflow-y: auto; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Catgirl Café</h1>
+  <p class="lede">
+    Numbers that go up. Staff work while the tab is closed, upgrades multiply
+    each other, and renovating trades everything you have for a permanent
+    bonus. Saved in this browser only.
+  </p>
+
+  <div class="panel top">
+    <div>
+      <div class="coins" id="coins">0</div>
+      <div class="rate" id="rate">0 / second</div>
+    </div>
+    <div class="servewrap">
+      <button class="primary serve" id="serve">Serve a customer</button>
+    </div>
+  </div>
+
+  <div class="cols">
+    <section class="panel">
+      <h2 style="margin-top:0">Staff &amp; fittings</h2>
+      <div id="buildings"></div>
+    </section>
+
+    <section>
+      <div class="panel">
+        <h2 style="margin-top:0">Upgrades</h2>
+        <div id="upgrades"></div>
+        <p class="small muted" id="no-upgrades" hidden>Nothing to buy yet — keep growing.</p>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <h2 style="margin-top:0">Renovate</h2>
+        <p class="small muted" id="prestige-note"></p>
+        <button id="prestige">Renovate</button>
+      </div>
+
+      <div class="panel" style="margin-top:16px">
+        <h2 style="margin-top:0">Save</h2>
+        <div class="row">
+          <button id="export">Copy save</button>
+          <button id="import">Paste save</button>
+          <button id="wipe" class="ghost">Erase</button>
+        </div>
+        <p class="small muted" style="margin-bottom:0" id="saveinfo"></p>
+      </div>
+    </section>
+  </div>
+
+  <div class="panel" style="margin-top:16px">
+    <h2 style="margin-top:0">Log</h2>
+    <div class="log" id="log"></div>
+  </div>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/cafe.js"></script>
+</body>
+</html>

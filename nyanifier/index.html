@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nyanifier — catgirls.zone</title>
+<meta name="description" content="Turn text into cat nonsense in four escalating levels. Deterministic, dependency-free, usable as a library and a CLI.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%BE%3C/text%3E%3C/svg%3E">
+<style>
+  .io { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 720px) { .io { grid-template-columns: 1fr; } }
+  .io textarea { min-height: 190px; }
+  .levels { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0 6px; }
+  .levels button { flex: 1 1 140px; text-align: left; }
+  .levels button[aria-pressed="true"] { border-color: var(--cyan); background: var(--panel-2); }
+  .levels b { display: block; font-size: .95rem; }
+  .levels span { display: block; font-size: .76rem; color: var(--muted); margin-top: 2px; }
+  #out { min-height: 190px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Nyanifier</h1>
+  <p class="lede">
+    Text in, cat nonsense out. The same text always comes out the same way —
+    the randomness is seeded from the text itself, so this is safe to run twice
+    and possible to write tests against.
+  </p>
+
+  <div class="panel">
+    <div class="levels" id="levels"></div>
+
+    <div class="io" style="margin-top:8px">
+      <label class="field" style="margin:0"><span>Input</span>
+        <textarea id="in" spellcheck="false">Hello there. I am not a normal person, and this is really fine.</textarea>
+      </label>
+      <label class="field" style="margin:0"><span>Output</span>
+        <div class="out" id="out"></div>
+      </label>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="primary" id="copy">Copy output</button>
+      <button id="swap">Use output as input</button>
+      <span class="grow"></span>
+      <span class="small muted" id="stat"></span>
+    </div>
+  </div>
+
+  <h2>What each level does</h2>
+  <p class="muted small" style="max-width:64ch">
+    Levels stack: each one includes everything below it. Links, e-mail
+    addresses, <code>@handles</code>, <code>#tags</code>, anything in backticks
+    and file-like tokens are left alone at every level, so pasting a message
+    with a URL in it does not produce a broken URL.
+  </p>
+
+  <h2>Use it in your own code</h2>
+  <pre><code>&lt;script src="https://catgirls.zone/nyanifier/nyanify.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  nyanify("hello there")           // level 2 by default
+  nyanify("hello there", 4)        // pick a level
+  nyanify(text, { level: 3, keep: [/:\w+:/g] })   // protect your own patterns
+&lt;/script&gt;</code></pre>
+
+  <p class="small muted">
+    The same file works as a CommonJS module — <code>require("./nyanify.js")</code>
+    — and there is a command line wrapper next to it:
+  </p>
+
+<pre><code>curl -O https://catgirls.zone/nyanifier/nyanify.js
+curl -O https://catgirls.zone/nyanifier/cli.js
+
+echo "hello there" | node cli.js --level 4
+node cli.js --level 2 "hello there"</code></pre>
+
+  <p class="small muted">
+    Public domain, no dependencies, about 4 KB. Copy it into your project
+    rather than taking a dependency on this domain staying up.
+  </p>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/nyanifier/nyanify.js"></script>
+<script src="/assets/nyanifier-app.js"></script>
+</body>
+</html>

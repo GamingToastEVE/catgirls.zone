@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Developer tool belt — catgirls.zone</title>
+<meta name="description" content="Base64, JWT decoding, UUIDs, hashes, regex testing, cron parsing, timestamps, JSON formatting and text diff. Entirely client-side.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%94%A7%3C/text%3E%3C/svg%3E">
+<style>
+  .layout { display: grid; grid-template-columns: 210px 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+  .picker { position: sticky; top: 16px; }
+  .picker ul { list-style: none; margin: 10px 0 0; padding: 0; }
+  .picker li { margin: 0 0 2px; }
+  .picker button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border-color: transparent;
+    padding: 8px 11px;
+    font: 500 .92rem/1.3 inherit;
+    color: var(--muted);
+  }
+  .picker button:hover { border-color: var(--line); color: var(--fg); }
+  .picker button[aria-selected="true"] {
+    background: var(--panel-2);
+    border-color: var(--cyan);
+    color: var(--cyan);
+  }
+  .picker button .hint { float: right; font: .74rem var(--mono); opacity: .55; }
+
+  .tool { display: none; }
+  .tool.active { display: block; }
+  .tool > h2:first-child { margin-top: 0; }
+
+  .two { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 700px) { .two { grid-template-columns: 1fr; } }
+
+  mark { background: rgba(255,200,97,.32); color: var(--amber); border-radius: 3px; }
+  .chip {
+    display: inline-block;
+    font: .78rem var(--mono);
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 2px 9px;
+    margin: 0 5px 5px 0;
+    color: var(--muted);
+  }
+  table.kv { width: 100%; border-collapse: collapse; font: .88rem var(--mono); }
+  table.kv td { padding: 5px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  table.kv td:first-child { color: var(--muted); white-space: nowrap; width: 1%; }
+  .diffline { display: block; padding: 0 6px; border-radius: 3px; white-space: pre-wrap; }
+  .diffline.add { background: rgba(184,232,106,.13); color: var(--lime); }
+  .diffline.del { background: rgba(255,107,129,.13); color: var(--red); }
+  .diffline.same { color: var(--muted); }
+  .toolbar { margin: 10px 0 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Developer tool belt</h1>
+  <p class="lede">
+    The pile of small conversions you normally paste into somebody else's
+    website. All of it runs here, in this tab — nothing is sent anywhere, which
+    matters when the thing you are decoding is a token from production.
+    Press <kbd>/</kbd> to jump to the tool list.
+  </p>
+
+  <div class="layout">
+    <aside class="picker panel">
+      <input type="search" id="filter" placeholder="Filter tools…" aria-label="Filter tools">
+      <ul id="picker-list" role="tablist"></ul>
+    </aside>
+
+    <main>
+      <!-- base64 -->
+      <section class="tool panel" id="t-base64" role="tabpanel">
+        <h2>Base64</h2>
+        <div class="two">
+          <label class="field"><span>Text</span>
+            <textarea id="b64-plain" spellcheck="false" placeholder="Plain text"></textarea>
+          </label>
+          <label class="field"><span>Base64</span>
+            <textarea id="b64-enc" spellcheck="false" placeholder="Base64"></textarea>
+          </label>
+        </div>
+        <div class="row toolbar">
+          <label class="row small" style="gap:6px">
+            <input type="checkbox" id="b64-url" style="width:auto"> URL-safe (<code>-_</code>, no padding)
+          </label>
+          <span class="grow"></span>
+          <button id="b64-copy">Copy Base64</button>
+        </div>
+        <p class="small muted" style="margin-bottom:0">
+          Text is encoded as UTF-8 first, so non-ASCII survives the round trip.
+        </p>
+      </section>
+
+      <!-- jwt -->
+      <section class="tool panel" id="t-jwt" role="tabpanel">
+        <h2>JWT decoder</h2>
+        <label class="field"><span>Token</span>
+          <textarea id="jwt-in" spellcheck="false" placeholder="eyJhbGciOi…"></textarea>
+        </label>
+        <div id="jwt-out"></div>
+        <p class="small muted" style="margin-bottom:0">
+          This decodes only. Verifying the signature needs the issuer's key, so
+          a token that decodes cleanly here still proves nothing about who
+          issued it.
+        </p>
+      </section>
+
+      <!-- uuid -->
+      <section class="tool panel" id="t-uuid" role="tabpanel">
+        <h2>UUID</h2>
+        <div class="row">
+          <label class="field grow" style="max-width:140px"><span>How many</span>
+            <input type="number" id="uuid-n" value="5" min="1" max="500">
+          </label>
+          <label class="field grow" style="max-width:170px"><span>Case</span>
+            <select id="uuid-case">
+              <option value="lower">lowercase</option>
+              <option value="upper">UPPERCASE</option>
+            </select>
+          </label>
+          <label class="field grow" style="max-width:170px"><span>Braces</span>
+            <select id="uuid-fmt">
+              <option value="plain">plain</option>
+              <option value="braced">{braced}</option>
+              <option value="nodash">no dashes</option>
+            </select>
+          </label>
+        </div>
+        <div class="row toolbar">
+          <button class="primary" id="uuid-go">Generate</button>
+          <button id="uuid-copy">Copy all</button>
+        </div>
+        <div class="out" id="uuid-out" style="margin-top:12px"></div>
+        <p class="small muted" style="margin-bottom:0">
+          Version 4, from <code>crypto.getRandomValues</code> — the browser's
+          cryptographic random source, not <code>Math.random</code>.
+        </p>
+      </section>
+
+      <!-- hash -->
+      <section class="tool panel" id="t-hash" role="tabpanel">
+        <h2>Hashes</h2>
+        <label class="field"><span>Input</span>
+          <textarea id="hash-in" spellcheck="false" placeholder="Anything"></textarea>
+        </label>
+        <div id="hash-out"></div>
+        <p class="small muted" style="margin-bottom:0">
+          SHA-1 is here because you will meet it in old systems; do not pick it
+          for anything new. MD5 is missing because the browser's crypto API
+          refuses to implement it, which is a fair position.
+        </p>
+      </section>
+
+      <!-- regex -->
+      <section class="tool panel" id="t-regex" role="tabpanel">
+        <h2>Regex tester</h2>
+        <div class="row">
+          <label class="field grow"><span>Pattern</span>
+            <input type="text" id="re-pat" spellcheck="false" placeholder="\\b\\w+@\\w+\\.\\w+\\b">
+          </label>
+          <label class="field" style="max-width:120px"><span>Flags</span>
+            <input type="text" id="re-flags" spellcheck="false" value="g">
+          </label>
+        </div>
+        <label class="field"><span>Test string</span>
+          <textarea id="re-sub" spellcheck="false" placeholder="Text to match against"></textarea>
+        </label>
+        <div id="re-status" class="small" style="margin-bottom:8px"></div>
+        <div class="out" id="re-hl"></div>
+        <div id="re-groups" style="margin-top:12px"></div>
+      </section>
+
+      <!-- cron -->
+      <section class="tool panel" id="t-cron" role="tabpanel">
+        <h2>Cron parser</h2>
+        <label class="field"><span>Expression (minute hour day-of-month month day-of-week)</span>
+          <input type="text" id="cron-in" spellcheck="false" value="0 9 * * 1-5">
+        </label>
+        <div id="cron-out"></div>
+        <p class="small muted" style="margin-bottom:0">
+          Times are shown in your local zone. When both day-of-month and
+          day-of-week are restricted, cron fires when <em>either</em> matches —
+          a rule that surprises people often enough to be worth stating.
+        </p>
+      </section>
+
+      <!-- time -->
+      <section class="tool panel" id="t-time" role="tabpanel">
+        <h2>Timestamps</h2>
+        <div class="row">
+          <label class="field grow"><span>Unix seconds, milliseconds, or a date string</span>
+            <input type="text" id="ts-in" spellcheck="false" placeholder="1700000000">
+          </label>
+        </div>
+        <div class="row toolbar" style="margin-top:0">
+          <button id="ts-now">Now</button>
+        </div>
+        <div id="ts-out" style="margin-top:12px"></div>
+      </section>
+
+      <!-- json -->
+      <section class="tool panel" id="t-json" role="tabpanel">
+        <h2>JSON</h2>
+        <label class="field"><span>Input</span>
+          <textarea id="js-in" spellcheck="false" placeholder='{"hello":"world"}'></textarea>
+        </label>
+        <div class="row toolbar" style="margin-top:0">
+          <button class="primary" id="js-pretty">Format</button>
+          <button id="js-min">Minify</button>
+          <label class="row small" style="gap:6px">
+            <input type="checkbox" id="js-sort" style="width:auto"> sort keys
+          </label>
+          <span class="grow"></span>
+          <button id="js-copy">Copy</button>
+        </div>
+        <div id="js-status" class="small" style="margin:10px 0 8px"></div>
+        <pre id="js-out"></pre>
+      </section>
+
+      <!-- diff -->
+      <section class="tool panel" id="t-diff" role="tabpanel">
+        <h2>Text diff</h2>
+        <div class="two">
+          <label class="field"><span>Original</span>
+            <textarea id="d-a" spellcheck="false"></textarea>
+          </label>
+          <label class="field"><span>Changed</span>
+            <textarea id="d-b" spellcheck="false"></textarea>
+          </label>
+        </div>
+        <div class="row toolbar" style="margin-top:0">
+          <label class="row small" style="gap:6px">
+            <input type="checkbox" id="d-ws" style="width:auto"> ignore leading/trailing whitespace
+          </label>
+        </div>
+        <div id="d-stat" class="small muted" style="margin:10px 0 8px"></div>
+        <div class="out" id="d-out"></div>
+      </section>
+    </main>
+  </div>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/tools.js"></script>
+</body>
+</html>
