@@ -33,11 +33,22 @@ nyanifier/
 
 ## Development
 
-Static files, no build step:
+Static files, no build step, and **no backend of any kind** — nothing in this
+repository runs on a server. In production GitHub Pages just hands out the
+files.
+
+Locally you still need *some* static file server, because the pages reference
+their assets absolutely (`/assets/site.css`), which under `file://` resolves to
+the root of your disk rather than to the project. Any of these will do:
 
 ```sh
-python3 -m http.server 8000
+python3 -m http.server 8000    # already installed on most machines
+npx serve .
+php -S localhost:8000
 ```
+
+Python is used above purely because it is usually present. It is a dev-time
+convenience, not part of the site.
 
 ## Notable details
 
