@@ -10,6 +10,7 @@ backend, no accounts, no analytics, nothing uploaded.
 | `/kaomoji`    | Searchable kaomoji collection, keyboard driven                    |
 | `/nyanifier`  | Text transformer in four levels — also a library and a CLI        |
 | `/cafe`       | Idle game: staff, upgrades, prestige, offline earnings            |
+| `/casino`     | Play-money slots, roulette and blackjack with honest, stated odds |
 
 ## Why client-side
 
@@ -62,6 +63,11 @@ convenience, not part of the site.
   afterwards.
 - **The café** grants offline earnings capped at eight hours, and stores
   everything in one localStorage key you can export as a string.
+- **The casino** uses play money that cannot be bought and refills for free.
+  Nothing is rigged in either direction. The slot machine's return-to-player is
+  computed by enumerating all 216 reel combinations at page load rather than
+  written down, so the advertised figure cannot drift from the paytable, and
+  every roulette bet was verified to carry the same 36/37 expectation.
 
 ## License
 

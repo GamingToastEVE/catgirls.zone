@@ -62,7 +62,8 @@
     ["/wort/", "word game"],
     ["/kaomoji/", "kaomoji"],
     ["/nyanifier/", "nyanifier"],
-    ["/cafe/", "café"]
+    ["/cafe/", "café"],
+    ["/casino/", "casino"]
   ];
 
   // One header everywhere, marking the current section.

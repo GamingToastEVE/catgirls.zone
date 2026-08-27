@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Play-money casino — catgirls.zone</title>
+<meta name="description" content="Slots, roulette and blackjack with play money. Honest odds, the real house edge shown, and your actual return tracked against it.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%B0%3C/text%3E%3C/svg%3E">
+<style>
+  .bank {
+    display: flex; gap: 22px; align-items: center; flex-wrap: wrap;
+    position: sticky; top: 0; z-index: 6;
+    background: linear-gradient(180deg, var(--panel) 80%, rgba(26,23,38,.9));
+    border: 1px solid var(--line); border-radius: var(--radius);
+    padding: 14px 18px; margin-bottom: 18px;
+  }
+  .bank .chips { font: 700 1.7rem/1 var(--mono); letter-spacing: -.02em; }
+  .bank .lbl { font-size: .72rem; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .bank .net.up { color: var(--lime); } .bank .net.down { color: var(--red); }
+
+  .tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+  .tabs button[aria-selected="true"] { border-color: var(--cyan); background: var(--panel-2); color: var(--cyan); }
+  .game { display: none; } .game.active { display: block; }
+
+  /* slots */
+  .reels { display: flex; gap: 10px; justify-content: center; margin: 8px 0 16px; }
+  .reel {
+    width: clamp(74px, 20vw, 104px); aspect-ratio: 1;
+    display: grid; place-items: center;
+    font-size: clamp(2.4rem, 8vw, 3.4rem);
+    background: #100d1a; border: 2px solid var(--line); border-radius: 14px;
+  }
+  .reel.spin { animation: jitter .28s linear infinite; }
+  @keyframes jitter { 50% { transform: translateY(-6px); } }
+  .reel.win { border-color: var(--lime); background: #16301c; }
+  .paytable { width: 100%; border-collapse: collapse; font: .86rem var(--mono); }
+  .paytable td, .paytable th { padding: 5px 8px; border-bottom: 1px solid var(--line); text-align: right; }
+  .paytable td:first-child, .paytable th:first-child { text-align: left; }
+  .paytable th { color: var(--muted); font-weight: 500; font-size: .76rem; text-transform: uppercase; }
+
+  /* roulette */
+  .wheel { text-align: center; font: 700 2.6rem/1.2 var(--mono); padding: 14px; }
+  .pocket { display: inline-grid; place-items: center; width: 84px; height: 84px; border-radius: 50%; }
+  .pocket.red { background: #7d2230; } .pocket.black { background: #23202e; border: 1px solid var(--line); }
+  .pocket.green { background: #1d5c33; }
+  .numgrid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; margin-bottom: 8px; }
+  .numgrid button { padding: 7px 0; font: .78rem var(--mono); border-radius: 5px; }
+  .numgrid button.red { background: #5c1d26; } .numgrid button.black { background: #1c1a26; }
+  .numgrid button.zero { background: #17492a; grid-column: span 12; }
+  .numgrid button.picked { border-color: var(--amber); color: var(--amber); }
+  .outside { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }
+  .outside button[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); }
+
+  /* blackjack */
+  .hand { margin-bottom: 12px; }
+  .cards { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 5px; }
+  .card {
+    width: 52px; height: 74px; border-radius: 7px; background: #f6f2ea; color: #1a1a1a;
+    display: grid; place-items: center; font: 700 1.15rem/1 var(--mono);
+    border: 1px solid #cfc7b8;
+  }
+  .card.red { color: #b3213a; }
+  .card.back { background: repeating-linear-gradient(45deg, #2a2440, #2a2440 5px, #352d4f 5px, #352d4f 10px); color: transparent; border-color: var(--line); }
+  .htotal { font: .82rem var(--mono); color: var(--muted); }
+
+  .betrow { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; margin: 12px 0; }
+  .betrow label { margin: 0; }
+  .betrow input { width: 110px; }
+  .result { min-height: 26px; font: 600 1rem/1.6 var(--mono); }
+  .result.win { color: var(--lime); } .result.lose { color: var(--red); } .result.push { color: var(--amber); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Play-money casino</h1>
+  <p class="lede">
+    Chips have no value, cannot be bought, and refill for free when you run
+    out. The odds are the real ones — nothing here is tuned to let you win
+    early. Each game shows its actual house edge, and the panel at the top
+    tracks what you have really got back against it.
+  </p>
+
+  <div class="bank">
+    <div>
+      <div class="lbl">Chips</div>
+      <div class="chips" id="chips">0</div>
+    </div>
+    <div>
+      <div class="lbl">Wagered</div>
+      <div id="wagered" class="htotal">0</div>
+    </div>
+    <div>
+      <div class="lbl">Net</div>
+      <div id="net" class="htotal net">0</div>
+    </div>
+    <div>
+      <div class="lbl">Your return</div>
+      <div id="rtp" class="htotal">—</div>
+    </div>
+    <span class="grow"></span>
+    <button id="topup">Free refill</button>
+    <button id="reset" class="ghost">Reset stats</button>
+  </div>
+
+  <div class="tabs" id="tabs" role="tablist"></div>
+
+  <!-- SLOTS -->
+  <section class="game panel" id="g-slots" role="tabpanel">
+    <h2 style="margin-top:0">Slots</h2>
+    <div class="reels">
+      <div class="reel" id="r0">🍒</div>
+      <div class="reel" id="r1">🍋</div>
+      <div class="reel" id="r2">🔔</div>
+    </div>
+    <div class="betrow" style="justify-content:center">
+      <label class="field"><span>Bet</span><input type="number" id="s-bet" value="10" min="1" step="1"></label>
+      <button class="primary" id="s-spin">Spin</button>
+      <button id="s-auto">Auto ×25</button>
+    </div>
+    <div class="result" id="s-result" style="text-align:center"></div>
+    <h2>Paytable</h2>
+    <table class="paytable" id="s-pay"></table>
+    <p class="small muted" id="s-edge" style="margin-bottom:0"></p>
+  </section>
+
+  <!-- ROULETTE -->
+  <section class="game panel" id="g-roulette" role="tabpanel">
+    <h2 style="margin-top:0">Roulette</h2>
+    <div class="wheel"><span class="pocket green" id="r-pocket">–</span></div>
+    <div class="numgrid" id="r-nums"></div>
+    <div class="outside" id="r-outside"></div>
+    <div class="betrow">
+      <label class="field"><span>Bet</span><input type="number" id="r-bet" value="10" min="1" step="1"></label>
+      <button class="primary" id="r-spin">Spin</button>
+      <button id="r-clear" class="ghost">Clear bet</button>
+      <span class="grow"></span>
+      <span class="htotal" id="r-selected">No bet selected</span>
+    </div>
+    <div class="result" id="r-result"></div>
+    <p class="small muted" style="margin-bottom:0">
+      European wheel: 37 pockets, a single zero. Every bet here carries the same
+      house edge of 2.70% — the zero is the whole of it. A straight number pays
+      35 to 1 but wins 1 time in 37, which is where the missing 2.70% lives.
+    </p>
+  </section>
+
+  <!-- BLACKJACK -->
+  <section class="game panel" id="g-blackjack" role="tabpanel">
+    <h2 style="margin-top:0">Blackjack</h2>
+    <div class="hand">
+      <div class="lbl">Dealer <span class="htotal" id="b-dtotal"></span></div>
+      <div class="cards" id="b-dealer"></div>
+    </div>
+    <div class="hand">
+      <div class="lbl">You <span class="htotal" id="b-ptotal"></span></div>
+      <div class="cards" id="b-player"></div>
+    </div>
+    <div class="betrow">
+      <label class="field"><span>Bet</span><input type="number" id="b-bet" value="10" min="1" step="1"></label>
+      <button class="primary" id="b-deal">Deal</button>
+      <button id="b-hit" disabled>Hit</button>
+      <button id="b-stand" disabled>Stand</button>
+      <button id="b-double" disabled>Double</button>
+    </div>
+    <div class="result" id="b-result"></div>
+    <p class="small muted" style="margin-bottom:0">
+      Six decks, reshuffled when the shoe runs low. Dealer stands on all 17s,
+      blackjack pays 3 to 2, doubling allowed on any two cards. No splitting —
+      it is the one rule that would double the state to track, and it changes
+      the edge by a few tenths of a percent. Played well this is the narrowest
+      house edge on this page, well under 1%.
+    </p>
+  </section>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/casino.js"></script>
+</body>
+</html>

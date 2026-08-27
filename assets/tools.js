@@ -598,6 +598,14 @@
   // opens showing an input with no output beside it.
   runCron();
 
-  var initial = location.hash.replace("#", "");
-  select(TOOLS.some(function (t) { return t[0] === initial; }) ? initial : "base64", true);
+  function fromHash(fallback) {
+    var h = location.hash.replace("#", "");
+    return TOOLS.some(function (t) { return t[0] === h; }) ? h : fallback;
+  }
+
+  // A hash change alone does not reload the page, so the tab has to follow it
+  // explicitly — otherwise back/forward and pasted anchors land on the wrong tool.
+  window.addEventListener("hashchange", function () { select(fromHash("base64"), true); });
+
+  select(fromHash("base64"), true);
 })();
