@@ -271,79 +271,169 @@
     ["c3", "Column 3", 2, function (n) { return n !== 0 && n % 3 === 0; }]
   ];
 
-  var pick = { kind: null, value: null };
+  // The table as laid out by the player: every spot they have chips on, keyed
+  // by "n17" for a straight number or by the outside bet's id. Each entry is a
+  // stake that wins or loses on its own, the way chips on a real layout do.
+  var table = {};
+  // Named chipOrder, not history: a `var history` here would shadow
+  // window.history for the whole module and break pickGame's replaceState.
+  var chipOrder = [];               // spot ids in the order they were backed
+  var spotEls = {};
+
+  function spotLabel(key) {
+    if (key.charAt(0) === "n") return "Straight " + key.slice(1);
+    var o = outsideById(key);
+    return o ? o[1] : key;
+  }
+
+  function spotOdds(key) {
+    if (key.charAt(0) === "n") return 35;
+    var o = outsideById(key);
+    return o ? o[2] : 0;
+  }
+
+  function spotWins(key, n) {
+    if (key.charAt(0) === "n") return +key.slice(1) === n;
+    var o = outsideById(key);
+    return o ? o[3](n) : false;
+  }
+
+  function outsideById(id) {
+    for (var i = 0; i < OUTSIDE.length; i++) if (OUTSIDE[i][0] === id) return OUTSIDE[i];
+    return null;
+  }
+
+  function tableTotal() {
+    var t = 0;
+    Object.keys(table).forEach(function (k) { t += table[k]; });
+    return t;
+  }
 
   function buildRoulette() {
     var g = $("#r-nums");
-    g.appendChild(el("button", {
-      class: "zero", text: "0",
-      onclick: function () { choose("straight", 0); }
-    }));
-    for (var n = 1; n <= 36; n++) (function (n) {
-      g.appendChild(el("button", {
-        class: colorOf(n), text: String(n), "data-n": n,
-        onclick: function () { choose("straight", n); }
-      }));
-    })(n);
+    g.appendChild(numButton(0, "zero"));
+    for (var n = 1; n <= 36; n++) g.appendChild(numButton(n, colorOf(n)));
 
     OUTSIDE.forEach(function (o) {
-      $("#r-outside").appendChild(el("button", {
-        text: o[1] + "  " + o[2] + ":1", "data-o": o[0], "aria-pressed": "false",
-        onclick: function () { choose("outside", o[0]); }
-      }));
+      var amt = el("span", { class: "amt", hidden: "hidden" });
+      var btn = el("button", {
+        "data-o": o[0],
+        onclick: function () { addChip(o[0]); },
+        oncontextmenu: function (e) { e.preventDefault(); removeChip(o[0]); }
+      }, [document.createTextNode(o[1] + "  " + o[2] + ":1"), amt]);
+      spotEls[o[0]] = amt;
+      $("#r-outside").appendChild(btn);
     });
   }
 
-  function choose(kind, value) {
-    pick = { kind: kind, value: value };
+  function numButton(n, cls) {
+    var amt = el("span", { class: "amt", hidden: "hidden" });
+    var key = "n" + n;
+    var btn = el("button", {
+      class: cls, "data-n": n,
+      onclick: function () { addChip(key); },
+      oncontextmenu: function (e) { e.preventDefault(); removeChip(key); }
+    }, [document.createTextNode(String(n)), amt]);
+    spotEls[key] = amt;
+    return btn;
+  }
+
+  function chipSize() {
+    var v = Math.floor(+$("#r-bet").value);
+    return v > 0 ? v : 0;
+  }
+
+  function addChip(key) {
+    var c = chipSize();
+    if (!c) return UI.toast("Set a chip size first");
+    // Checked as the chips go down rather than at spin time, so the table can
+    // never hold more than the player can actually cover.
+    if (tableTotal() + c > B.chips) return UI.toast("Not enough chips for that");
+    table[key] = (table[key] || 0) + c;
+    chipOrder.push(key);
+    drawTable();
+  }
+
+  function removeChip(key) {
+    if (!table[key]) return;
+    var c = Math.min(chipSize() || table[key], table[key]);
+    table[key] -= c;
+    if (table[key] <= 0) delete table[key];
+    for (var i = chipOrder.length - 1; i >= 0; i--) {
+      if (chipOrder[i] === key) { chipOrder.splice(i, 1); break; }
+    }
+    drawTable();
+  }
+
+  function drawTable() {
+    Object.keys(spotEls).forEach(function (k) {
+      var amt = spotEls[k];
+      if (table[k]) { amt.hidden = false; amt.textContent = fmt(table[k]); }
+      else { amt.hidden = true; amt.textContent = ""; }
+    });
     UI.$$("#r-nums button").forEach(function (b) {
-      b.classList.toggle("picked", kind === "straight" && +b.textContent === value);
+      b.classList.toggle("picked", !!table["n" + b.dataset.n]);
     });
-    UI.$$("#r-outside button").forEach(function (b) {
-      b.setAttribute("aria-pressed", String(kind === "outside" && b.dataset.o === value));
-    });
-    var label = kind === "straight"
-      ? "Straight up on " + value + " — pays 35:1"
-      : OUTSIDE.filter(function (o) { return o[0] === value; })[0][1] + " — pays " +
-        OUTSIDE.filter(function (o) { return o[0] === value; })[0][2] + ":1";
-    $("#r-selected").textContent = label;
+    var total = tableTotal(), spots = Object.keys(table).length;
+    $("#r-total").textContent = total
+      ? fmt(total) + " on " + spots + (spots === 1 ? " spot" : " spots")
+      : "Nothing staked";
   }
 
-  $("#r-clear").addEventListener("click", function () {
-    pick = { kind: null, value: null };
-    UI.$$("#r-nums button").forEach(function (b) { b.classList.remove("picked"); });
-    UI.$$("#r-outside button").forEach(function (b) { b.setAttribute("aria-pressed", "false"); });
-    $("#r-selected").textContent = "No bet selected";
+  function clearTable() {
+    table = {};
+    chipOrder = [];
+    drawTable();
+  }
+
+  $("#r-clear").addEventListener("click", clearTable);
+
+  $("#r-undo").addEventListener("click", function () {
+    if (!chipOrder.length) return;
+    removeChip(chipOrder[chipOrder.length - 1]);
   });
 
   $("#r-spin").addEventListener("click", function () {
-    if (!pick.kind) return UI.toast("Pick a bet first");
-    var bet = betOf("#r-bet");
-    if (!bet) return UI.toast("Out of chips — use the free refill");
-    if (!stake(bet)) return;
+    var total = tableTotal();
+    if (!total) return UI.toast("Put some chips on the table first");
+    if (!stake(total)) return UI.toast("Not enough chips");
 
     var n = randInt(37);
     var pocket = $("#r-pocket");
     pocket.className = "pocket " + colorOf(n);
     pocket.textContent = String(n);
 
-    var win = false, odds = 0;
-    if (pick.kind === "straight") { win = n === pick.value; odds = 35; }
-    else {
-      var o = OUTSIDE.filter(function (x) { return x[0] === pick.value; })[0];
-      win = o[3](n); odds = o[2];
-    }
+    // Every spot settles independently: one spin can pay some and lose others.
+    var rows = [], won = 0;
+    Object.keys(table).forEach(function (key) {
+      var bet = table[key], hit = spotWins(key, n);
+      var back = hit ? bet * (spotOdds(key) + 1) : 0;
+      won += back;
+      rows.push({ label: spotLabel(key), bet: bet, hit: hit, back: back });
+    });
+    payout(won);
 
+    rows.sort(function (a, b) { return b.back - a.back || a.label.localeCompare(b.label); });
+    var tb = el("tbody");
+    rows.forEach(function (r) {
+      tb.appendChild(el("tr", { class: r.hit ? "hit" : "miss" }, [
+        el("td", { text: r.label }),
+        el("td", { text: fmt(r.bet) + " staked" }),
+        el("td", { text: r.hit ? "+" + fmt(r.back - r.bet) : "−" + fmt(r.bet) })
+      ]));
+    });
+    $("#r-breakdown").textContent = "";
+    $("#r-breakdown").appendChild(el("table", null, [tb]));
+
+    var net = won - total;
     var res = $("#r-result");
-    if (win) {
-      var got = bet * (odds + 1);          // stake returned plus winnings
-      payout(got);
-      res.className = "result win";
-      res.textContent = n + " " + colorOf(n) + " — won " + fmt(got - bet);
-    } else {
-      res.className = "result lose";
-      res.textContent = n + " " + colorOf(n) + " — lost " + fmt(bet);
-    }
+    res.className = "result " + (net > 0 ? "win" : net < 0 ? "lose" : "push");
+    res.textContent = n + " " + colorOf(n) + " — " +
+      (net > 0 ? "up " + fmt(net) : net < 0 ? "down " + fmt(-net) : "even") +
+      " on " + rows.length + (rows.length === 1 ? " bet" : " bets");
+
+    // The chips stay where they were put, so repeating a layout is one click.
+    drawTable();
   });
 
   /* ================= blackjack ================= */
@@ -514,5 +604,7 @@
 
   // exposed only so the test harness can check the maths
   window.__casino = { slotRTP: slotRTP, slotPay: slotPay, handValue: handValue,
-                      colorOf: colorOf, OUTSIDE: OUTSIDE, SYMBOLS: SYMBOLS };
+                      colorOf: colorOf, OUTSIDE: OUTSIDE, SYMBOLS: SYMBOLS,
+                      spotWins: spotWins, spotOdds: spotOdds,
+                      tableTotal: tableTotal, table: function () { return table; } };
 })();

@@ -49,6 +49,19 @@
   .numgrid button.red { background: #5c1d26; } .numgrid button.black { background: #1c1a26; }
   .numgrid button.zero { background: #17492a; grid-column: span 12; }
   .numgrid button.picked { border-color: var(--amber); color: var(--amber); }
+  .numgrid button, .outside button { position: relative; }
+  .amt {
+    position: absolute; top: -6px; right: -4px;
+    background: var(--amber); color: #2a1c05;
+    font: 700 .68rem/1 var(--mono);
+    padding: 2px 5px; border-radius: 999px;
+    pointer-events: none;
+  }
+  .outside .amt { top: -5px; right: -5px; }
+  #r-breakdown table { width: 100%; border-collapse: collapse; font: .84rem var(--mono); margin-top: 8px; }
+  #r-breakdown td { padding: 4px 8px; border-bottom: 1px solid var(--line); }
+  #r-breakdown td:last-child { text-align: right; }
+  #r-breakdown .hit { color: var(--lime); } #r-breakdown .miss { color: var(--muted); }
   .outside { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 6px; }
   .outside button[aria-pressed="true"] { border-color: var(--amber); color: var(--amber); }
 
@@ -133,17 +146,26 @@
     <div class="numgrid" id="r-nums"></div>
     <div class="outside" id="r-outside"></div>
     <div class="betrow">
-      <label class="field"><span>Bet</span><input type="number" id="r-bet" value="10" min="1" step="1"></label>
+      <label class="field"><span>Chip size</span><input type="number" id="r-bet" value="10" min="1" step="1"></label>
       <button class="primary" id="r-spin">Spin</button>
-      <button id="r-clear" class="ghost">Clear bet</button>
+      <button id="r-clear" class="ghost">Clear table</button>
+      <button id="r-undo" class="ghost">Undo</button>
       <span class="grow"></span>
-      <span class="htotal" id="r-selected">No bet selected</span>
+      <span class="htotal" id="r-total">Nothing staked</span>
     </div>
     <div class="result" id="r-result"></div>
+    <div id="r-breakdown"></div>
+    <p class="small muted" style="margin-bottom:0">
+      Click a number or an outside area to put a chip on it, and keep clicking
+      to stack more. Right-click a spot to take one chip back. Bets settle
+      independently, so a spin can pay one of them and lose the others.
+    </p>
     <p class="small muted" style="margin-bottom:0">
       European wheel: 37 pockets, a single zero. Every bet here carries the same
       house edge of 2.70% — the zero is the whole of it. A straight number pays
       35 to 1 but wins 1 time in 37, which is where the missing 2.70% lives.
+      Covering more of the table does not change that: spreading chips around
+      lowers how much the result swings, never what it costs on average.
     </p>
   </section>
 
