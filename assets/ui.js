@@ -63,7 +63,9 @@
     ["/kaomoji/", "kaomoji"],
     ["/nyanifier/", "nyanifier"],
     ["/cafe/", "café"],
-    ["/casino/", "casino"]
+    ["/casino/", "casino"],
+    ["/testdata/", "test data"],
+    ["/when/", "when"]
   ];
 
   // One header everywhere, marking the current section.

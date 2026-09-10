@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test data generator — catgirls.zone</title>
+<meta name="description" content="Reproducible fake data from a seed: names, addresses, IBANs with real checksums. JSON, NDJSON, CSV or SQL. Entirely client-side.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%A7%AA%3C/text%3E%3C/svg%3E">
+<style>
+  #fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 6px 14px;
+    margin-top: 4px;
+  }
+  #out {
+    white-space: pre;
+    overflow: auto;
+    max-height: 460px;
+    font: .82rem/1.5 var(--mono);
+  }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .controls .field { margin: 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>Test data</h1>
+  <p class="lede">
+    Fake rows for fixtures and demos. Everything comes from the seed, so the
+    same link always produces exactly the same data — you can put the link in a
+    README instead of committing a fixture file, and regenerate it years later.
+  </p>
+
+  <div class="panel">
+    <div class="controls">
+      <label class="field grow" style="max-width:220px"><span>Seed</span>
+        <input type="text" id="seed" spellcheck="false" value="catgirls">
+      </label>
+      <label class="field" style="max-width:120px"><span>Rows</span>
+        <input type="number" id="count" value="10" min="1" max="1000">
+      </label>
+      <label class="field" style="max-width:150px"><span>Locale</span>
+        <select id="locale">
+          <option value="de">German</option>
+          <option value="en">English</option>
+        </select>
+      </label>
+      <label class="field" style="max-width:150px"><span>Format</span>
+        <select id="format">
+          <option value="json">JSON</option>
+          <option value="ndjson">NDJSON</option>
+          <option value="csv">CSV</option>
+          <option value="sql">SQL INSERT</option>
+        </select>
+      </label>
+      <label class="field" id="table-wrap" style="max-width:180px" hidden><span>Table name</span>
+        <input type="text" id="table" spellcheck="false" value="people">
+      </label>
+      <button id="reroll">New seed</button>
+    </div>
+
+    <div class="row" style="margin-top:16px">
+      <span class="small muted">Fields</span>
+      <span class="grow"></span>
+      <button id="all">All</button>
+      <button id="none">None</button>
+    </div>
+    <div id="fields"></div>
+  </div>
+
+  <div class="panel">
+    <div class="row" style="margin-bottom:12px">
+      <button class="primary" id="copy">Copy</button>
+      <button id="download">Download</button>
+      <button id="share">Copy link</button>
+      <span class="grow"></span>
+      <span class="small muted" id="stat"></span>
+    </div>
+    <div class="out" id="out"></div>
+  </div>
+
+  <h2>Notes</h2>
+  <ul class="small muted" style="max-width:70ch">
+    <li>
+      Each row gets its own random stream, keyed by the seed and the row index.
+      Raising the row count appends rows; it never reshuffles the ones already
+      shown.
+    </li>
+    <li>
+      The IBANs carry a real mod-97 check digit, so they pass validation — but
+      the bank and account parts are invented. They are for testing input
+      handling, nothing else.
+    </li>
+    <li>
+      Names, companies and addresses are assembled from small word lists. Any
+      resemblance to a real person or business is coincidence.
+    </li>
+    <li>
+      Nothing leaves this tab; the whole configuration lives in the query
+      string of the URL above.
+    </li>
+  </ul>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/testdata.js"></script>
+</body>
+</html>

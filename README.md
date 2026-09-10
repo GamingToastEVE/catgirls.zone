@@ -1,6 +1,6 @@
 # catgirls.zone
 
-Five small things, each on its own path. Everything runs in the browser — no
+Small things, each on its own path. Everything runs in the browser — no
 backend, no accounts, no analytics, nothing uploaded.
 
 | Path          | What it is                                                        |
@@ -11,6 +11,8 @@ backend, no accounts, no analytics, nothing uploaded.
 | `/nyanifier`  | Text transformer in four levels — also a library and a CLI        |
 | `/cafe`       | Idle game: staff, upgrades, prestige, offline earnings            |
 | `/casino`     | Play-money slots, roulette and blackjack with honest, stated odds |
+| `/testdata`   | Seeded fake data — names, addresses, valid IBANs — as JSON, NDJSON, CSV or SQL |
+| `/when`       | Meeting time finder across zones, with the whole plan encoded in the URL |
 
 ## Why client-side
 
@@ -26,6 +28,8 @@ assets/          shared stylesheet, tiny DOM helpers, one script per app
   ui.js          $ / el / toast / clipboard / shared header
   words.js       1034 five-letter words, generated and verified
   kaomoji.js     the kaomoji data
+  testdata.js    seeded generators, IBAN mod-97, output formats
+  when.js        time zone offsets and the availability grid
 nyanifier/
   nyanify.js     the library — UMD, works in a browser and in node
   cli.js         command line wrapper
@@ -68,6 +72,16 @@ convenience, not part of the site.
   computed by enumerating all 216 reel combinations at page load rather than
   written down, so the advertised figure cannot drift from the paytable, and
   every roulette bet was verified to carry the same 36/37 expectation.
+
+- **The test data generator** seeds one random stream per row from the seed and
+  the row index, so raising the row count appends rows instead of reshuffling
+  the ones already on screen. IBANs carry a real mod-97 check digit, computed
+  digit by digit because the full number is well past what a double can hold.
+- **The meeting finder** asks `Intl` for the wall clock in a zone, reads it back
+  as if it were UTC, and subtracts — that difference is the offset, daylight
+  saving included, with no table to go stale. Converting the other way takes two
+  passes, since the first guess uses the offset at the wrong instant. Half-hour
+  and forty-five-minute zones fall out of this for free.
 
 ## License
 

@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meeting time finder — catgirls.zone</title>
+<meta name="description" content="Line up a day across time zones and find an hour nobody has to be awake at 4am for. The whole plan lives in the link.">
+<link rel="stylesheet" href="/assets/site.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%95%92%3C/text%3E%3C/svg%3E">
+<style>
+  #grid { overflow-x: auto; }
+  table.when { border-collapse: separate; border-spacing: 2px; font: .78rem var(--mono); }
+  table.when th { font-weight: 600; color: var(--muted); }
+  table.when thead th { padding: 0 0 4px; font-size: .72rem; }
+  th.who {
+    text-align: left;
+    white-space: nowrap;
+    padding-right: 12px;
+    position: relative;
+  }
+  th.who b { display: block; font-size: .84rem; color: var(--fg); }
+  th.who span { font-size: .7rem; color: var(--muted); }
+  th.who .drop {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    padding: 1px 7px; font-size: .8rem; line-height: 1.2;
+    background: transparent; border-color: transparent; color: var(--muted);
+    opacity: 0;
+  }
+  th.who:hover .drop, th.who .drop:focus { opacity: 1; }
+
+  td.slot {
+    width: 34px; height: 34px; text-align: center; border-radius: 5px;
+    background: var(--panel-2); color: var(--muted);
+  }
+  td.slot b { font-weight: 600; }
+  td.slot i { display: block; font: .6rem/1 var(--mono); font-style: normal; opacity: .7; }
+  td.slot.ok  { background: #2f5d3a; color: #d6f2d8; }
+  td.slot.meh { background: #5d5326; color: #f0e7c2; }
+  td.slot.bad { background: #16121f; color: #4d4463; }
+
+  .pick {
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 9px;
+    margin-bottom: 8px; background: var(--panel-2);
+  }
+  .pick.ok { border-color: #3f7d46; }
+  .pick.meh { border-color: #9a8434; }
+  .pick > b { font: 700 1rem var(--mono); min-width: 9ch; }
+  .pick > span { flex: 1 1 240px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; }
+  .controls .field { margin: 0; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+  .legend span { display: flex; align-items: center; gap: 6px; font-size: .78rem; color: var(--muted); }
+  .swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="site-head"></div>
+
+  <h1>When</h1>
+  <p class="lede">
+    Put everyone's zone in a row and see the whole day at once. The plan lives
+    entirely in the link — send it and the other side sees the same grid, with
+    their own row already lined up.
+  </p>
+
+  <div class="panel">
+    <div class="controls">
+      <label class="field" style="max-width:180px"><span>Date</span>
+        <input type="date" id="date">
+      </label>
+      <button id="prev">◀ day</button>
+      <button id="today">Today</button>
+      <button id="next">day ▶</button>
+      <label class="field grow" style="max-width:260px"><span>Column zone</span>
+        <select id="anchor"></select>
+      </label>
+      <label class="field" style="max-width:110px"><span>Day starts</span>
+        <input type="number" id="from" min="0" max="23" value="9">
+      </label>
+      <label class="field" style="max-width:110px"><span>Day ends</span>
+        <input type="number" id="to" min="1" max="24" value="18">
+      </label>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div id="grid"></div>
+    <div class="legend">
+      <span><i class="swatch" style="background:#2f5d3a"></i> inside working hours (<b id="hours"></b>)</span>
+      <span><i class="swatch" style="background:#5d5326"></i> awake, but not working</span>
+      <span><i class="swatch" style="background:#16121f"></i> asleep</span>
+      <span><code>+1</code> / <code>-1</code> means a different calendar day</span>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="controls">
+      <label class="field grow" style="max-width:280px"><span>Add a zone</span>
+        <select id="add-zone"></select>
+      </label>
+      <label class="field grow" style="max-width:200px"><span>Label (optional)</span>
+        <input type="text" id="add-label" placeholder="e.g. Mira">
+      </label>
+      <button class="primary" id="add">Add</button>
+      <span class="grow"></span>
+      <button id="share">Copy link</button>
+    </div>
+  </div>
+
+  <h2>Best hours</h2>
+  <div id="best"></div>
+
+  <h2>Notes</h2>
+  <ul class="small muted" style="max-width:70ch">
+    <li>
+      Offsets come from your browser's own time zone database, including
+      daylight saving. Pick a date in the future and the grid uses the rules
+      that will apply <em>then</em>, not the ones in force today.
+    </li>
+    <li>
+      Columns are whole hours of the column zone's wall clock. Zones offset by
+      thirty or forty-five minutes therefore show minutes in their cells —
+      Kolkata and the Chatham Islands are not lining up with anyone.
+    </li>
+    <li>
+      On the day a zone springs forward, one wall-clock hour does not exist.
+      The grid shows the instant the clock actually jumps to, which is the same
+      thing a calendar invite would do.
+    </li>
+  </ul>
+
+  <div id="site-foot"></div>
+</div>
+
+<script src="/assets/ui.js"></script>
+<script src="/assets/when.js"></script>
+</body>
+</html>
