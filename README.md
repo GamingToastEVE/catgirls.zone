@@ -65,8 +65,12 @@ convenience, not part of the site.
   so the same text always transforms the same way. URLs, e-mail addresses,
   handles and backticked code are pulled out before transformation and put back
   afterwards.
-- **The café** grants offline earnings capped at eight hours, and stores
-  everything in one localStorage key you can export as a string.
+- **The café** grants offline earnings capped at eight hours (more from the
+  bean shop), and stores everything in one localStorage key you can export as a
+  string. Bulk purchases use the closed form of the geometric series rather
+  than a loop, which also gives "max" its inverse. Beans spent in the shop
+  still count towards the permanent bonus, since that bonus reads beans
+  *earned* — old saves migrate by treating their holdings as earnings.
 - **The casino** uses play money that cannot be bought and refills for free.
   Nothing is rigged in either direction. The slot machine's return-to-player is
   computed by enumerating all 216 reel combinations at page load rather than
